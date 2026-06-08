@@ -62,8 +62,8 @@ recastnavigation (Recast is state of the art navigation mesh construction toolse
   Custom changes: https://github.com/TrinityCore/recastnavigation/tree/3.3.5
 
 StormLib (a pack of modules, written in C++, which are able to read and also to write files from/to the MPQ archives)
-  http://www.zezula.net/en/mpq/stormlib.html
-  Version: 8.04
+  https://github.com/ladislav-zezula/StormLib
+  Version: 1df38c1f9cba98d2b6169ad04a84cd4d956fea38
 
 utf8-cpp (UTF-8 with C++ in a Portable Way)
   https://github.com/nemtrif/utfcpp

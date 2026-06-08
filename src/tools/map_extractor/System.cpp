@@ -256,7 +256,7 @@ uint32 ReadBuild(int locale)
     //printf("Read %s file... ", filename.c_str());
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, filename.c_str(), SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, filename.c_str(), SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Not found %s file!\n", filename.c_str());
         exit(1);
@@ -300,7 +300,7 @@ void ReadMapDBC()
     printf("Read Map.dbc file... ");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\Map.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\Map.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find Map.dbc in archive!\n");
         exit(1);
@@ -330,7 +330,7 @@ void ReadLiquidMaterialTable()
     printf("Read LiquidMaterial.dbc file...\n");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidMaterial.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidMaterial.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find LiquidMaterial.dbc in archive!\n");
         exit(1);
@@ -357,7 +357,7 @@ void ReadLiquidObjectTable()
     printf("Read LiquidObject.dbc file...\n");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidObject.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidObject.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find LiquidObject.dbc in archive!\n");
         exit(1);
@@ -383,7 +383,7 @@ void ReadLiquidTypeTable()
 {
     printf("Read LiquidType.dbc file...");
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find LiquidType.dbc in archive!\n");
         exit(1);
@@ -1129,7 +1129,7 @@ void ExtractDBCFiles(int locale)
         std::string fileName;
         do
         {
-            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_PATCHED_FILE, &dbcFile))
+            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_FROM_MPQ, &dbcFile))
             {
                 printf("Unable to open file %s in the archive\n", foundFile.cFileName);
                 continue;
@@ -1171,7 +1171,7 @@ void ExtractDB2Files(int locale)
         std::string fileName;
         do
         {
-            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_PATCHED_FILE, &dbcFile))
+            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_FROM_MPQ, &dbcFile))
             {
                 printf("Unable to open file %s in the archive\n", foundFile.cFileName);
                 continue;
@@ -1200,7 +1200,7 @@ void ExtractCameraFiles()
     printf("Extracting camera files...\n");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\CinematicCamera.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\CinematicCamera.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find Map.dbc in archive!\n");
         exit(1);
@@ -1246,7 +1246,7 @@ void ExtractCameraFiles()
 
         HANDLE dbcFile = nullptr;
 
-        if (!SFileOpenFileEx(WorldMpq, thisFile.c_str(), SFILE_OPEN_PATCHED_FILE, &dbcFile))
+        if (!SFileOpenFileEx(WorldMpq, thisFile.c_str(), SFILE_OPEN_FROM_MPQ, &dbcFile))
         {
             printf("Unable to open file %s in the archive\n", thisFile.c_str());
             continue;
@@ -1266,7 +1266,7 @@ bool LoadLocaleMPQFile(int locale)
 
     if (!SFileOpenArchive(fileName.c_str(), 0, MPQ_OPEN_READ_ONLY, &LocaleMpq))
     {
-        if (GetLastError() != ERROR_PATH_NOT_FOUND)
+        if (SErrGetLastError() != ERROR_PATH_NOT_FOUND)
         {
             printf("\nLoading %s locale MPQs\n", Locales[locale]);
             printf("Cannot open archive %s\n", fileName.c_str());
@@ -1298,7 +1298,7 @@ bool LoadLocaleMPQFile(int locale)
 
         if (!SFileOpenPatchArchive(LocaleMpq, fileName.c_str(), prefix, 0))
         {
-            if (GetLastError() != ERROR_FILE_NOT_FOUND)
+            if (SErrGetLastError() != ERROR_FILE_NOT_FOUND)
                 printf("Cannot open patch archive %s\n", fileName.c_str());
             continue;
         }
@@ -1316,7 +1316,7 @@ void LoadCommonMPQFiles(uint32 build)
     printf("Loading common MPQ files\n");
     if (!SFileOpenArchive(filename.c_str(), 0, MPQ_OPEN_READ_ONLY, &WorldMpq))
     {
-        if (GetLastError() != ERROR_PATH_NOT_FOUND)
+        if (SErrGetLastError() != ERROR_PATH_NOT_FOUND)
             printf("Cannot open archive %s\n", filename.c_str());
         return;
     }
@@ -1330,7 +1330,7 @@ void LoadCommonMPQFiles(uint32 build)
         filename = Trinity::StringFormat("%s/Data/%s", input_path.string(), CONF_mpq_list[i]);
         if (!SFileOpenPatchArchive(WorldMpq, filename.c_str(), "", 0))
         {
-            if (GetLastError() != ERROR_PATH_NOT_FOUND)
+            if (SErrGetLastError() != ERROR_PATH_NOT_FOUND)
                 printf("Cannot open archive %s\n", filename.c_str());
             else
                 printf("Not found %s\n", filename.c_str());
@@ -1362,7 +1362,7 @@ void LoadCommonMPQFiles(uint32 build)
 
         if (!SFileOpenPatchArchive(WorldMpq, filename.c_str(), prefix, 0))
         {
-            if (GetLastError() != ERROR_PATH_NOT_FOUND)
+            if (SErrGetLastError() != ERROR_PATH_NOT_FOUND)
                 printf("Cannot open patch archive %s\n", filename.c_str());
             else
                 printf("Not found %s\n", filename.c_str());
@@ -1400,7 +1400,7 @@ int main(int argc, char * arg[])
             //Open MPQs
             if (!LoadLocaleMPQFile(i))
             {
-                if (GetLastError() != ERROR_PATH_NOT_FOUND)
+                if (SErrGetLastError() != ERROR_PATH_NOT_FOUND)
                     printf("Unable to load %s locale archives!\n", Locales[i]);
                 continue;
             }

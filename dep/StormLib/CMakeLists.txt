@@ -11,6 +11,7 @@ set(SRC_FILES
            src/FileStream.cpp
            src/SBaseCommon.cpp
            src/SBaseFileTable.cpp
+           src/SBaseSubTypes.cpp
            src/SCompression.cpp
            src/SFileAddFile.cpp
            src/SFileAttributes.cpp
@@ -18,12 +19,14 @@ set(SRC_FILES
            src/SFileCreateArchive.cpp
            src/SFileExtractFile.cpp
            src/SFileFindFile.cpp
+           src/SFileGetFileInfo.cpp
            src/SFileListFile.cpp
            src/SFileOpenArchive.cpp
            src/SFileOpenFileEx.cpp
            src/SFilePatchArchives.cpp
            src/SFileReadFile.cpp
            src/SFileVerify.cpp
+           src/SMemUtf8.cpp
 )
 
 set(TOMCRYPT_FILES
@@ -57,9 +60,22 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/pk/asn1/der_decode_sequence_ex.c
            src/libtomcrypt/src/pk/asn1/der_decode_sequence_flexi.c
            src/libtomcrypt/src/pk/asn1/der_decode_sequence_multi.c
+           src/libtomcrypt/src/pk/asn1/der_encode_set.c
+           src/libtomcrypt/src/pk/asn1/der_encode_utctime.c
+           src/libtomcrypt/src/pk/asn1/der_encode_utf8_string.c
+           src/libtomcrypt/src/pk/asn1/der_encode_printable_string.c
+           src/libtomcrypt/src/pk/asn1/der_encode_ia5_string.c
+           src/libtomcrypt/src/pk/asn1/der_encode_object_identifier.c
+           src/libtomcrypt/src/pk/asn1/der_encode_octet_string.c
+           src/libtomcrypt/src/pk/asn1/der_encode_bit_string.c
+           src/libtomcrypt/src/pk/asn1/der_encode_short_integer.c
+           src/libtomcrypt/src/pk/asn1/der_encode_integer.c
+           src/libtomcrypt/src/pk/asn1/der_encode_boolean.c
+           src/libtomcrypt/src/pk/asn1/der_encode_setof.c
            src/libtomcrypt/src/pk/asn1/der_decode_short_integer.c
            src/libtomcrypt/src/pk/asn1/der_decode_utctime.c
            src/libtomcrypt/src/pk/asn1/der_decode_utf8_string.c
+           src/libtomcrypt/src/pk/asn1/der_encode_sequence_ex.c
            src/libtomcrypt/src/pk/asn1/der_length_bit_string.c
            src/libtomcrypt/src/pk/asn1/der_length_boolean.c
            src/libtomcrypt/src/pk/asn1/der_length_ia5_string.c
@@ -78,14 +94,17 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/pk/ecc/ltc_ecc_points.c
            src/libtomcrypt/src/pk/ecc/ltc_ecc_projective_add_point.c
            src/libtomcrypt/src/pk/ecc/ltc_ecc_projective_dbl_point.c
+           src/libtomcrypt/src/pk/pkcs1/pkcs_1_v1_5_encode.c
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_mgf1.c
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_oaep_decode.c
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_pss_decode.c
+           src/libtomcrypt/src/pk/pkcs1/pkcs_1_pss_encode.c
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_v1_5_decode.c
            src/libtomcrypt/src/pk/rsa/rsa_exptmod.c
            src/libtomcrypt/src/pk/rsa/rsa_free.c
            src/libtomcrypt/src/pk/rsa/rsa_import.c
            src/libtomcrypt/src/pk/rsa/rsa_make_key.c
+           src/libtomcrypt/src/pk/rsa/rsa_sign_hash.c
            src/libtomcrypt/src/pk/rsa/rsa_verify_hash.c
            src/libtomcrypt/src/pk/rsa/rsa_verify_simple.c
 )
