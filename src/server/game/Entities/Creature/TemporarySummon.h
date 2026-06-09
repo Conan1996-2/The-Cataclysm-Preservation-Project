@@ -119,7 +119,7 @@ class TC_GAME_API Guardian : public Minion
         bool InitStatsForLevel(uint8 level);
         void InitSummon() override;
 
-        bool UpdateStats(Stats stat) override;
+        bool UpdateStats(StatType stat) override;
         bool UpdateAllStats() override;
         void UpdateResistances(uint32 school) override;
         void UpdateArmor() override;
@@ -129,7 +129,7 @@ class TC_GAME_API Guardian : public Minion
         void UpdateDamagePhysical(WeaponAttackType attType) override;
 
         int32 GetBonusDamage() const { return m_bonusSpellDamage; }
-        float GetBonusStatFromOwner(Stats stat) const { return m_statFromOwner[stat]; }
+        float GetBonusStatFromOwner(StatType stat) const { return m_statFromOwner[stat]; }
         void SetBonusDamage(int32 damage);
     protected:
         int32   m_bonusSpellDamage;

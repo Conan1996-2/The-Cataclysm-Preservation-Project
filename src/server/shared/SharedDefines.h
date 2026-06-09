@@ -227,7 +227,7 @@ enum MoneyConstants
     GOLD   = SILVER*100
 };
 
-enum Stats
+enum StatType
 {
     STAT_STRENGTH                      = 0,
     STAT_AGILITY                       = 1,

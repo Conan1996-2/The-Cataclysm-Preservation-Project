@@ -2233,7 +2233,7 @@ void Player::GiveLevel(uint8 level)
     packet.PowerDelta[5] = 0;
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        packet.StatDelta[i] = int32(info.stats[i]) - GetCreateStat(Stats(i));
+        packet.StatDelta[i] = int32(info.stats[i]) - GetCreateStat(StatType(i));
 
     SendDirectMessage(packet.Write());
 
@@ -2250,7 +2250,7 @@ void Player::GiveLevel(uint8 level)
 
     // save base values (bonuses already included in stored stats
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetCreateStat(Stats(i), info.stats[i]);
+        SetCreateStat(StatType(i), info.stats[i]);
 
     SetCreateHealth(basehp);
     SetCreateMana(basemana);
@@ -2379,10 +2379,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // save base values (bonuses already included in stored stats
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetCreateStat(Stats(i), info.stats[i]);
+        SetCreateStat(StatType(i), info.stats[i]);
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetStat(Stats(i), info.stats[i]);
+        SetStat(StatType(i), info.stats[i]);
 
     SetCreateHealth(basehp);
 
@@ -5043,7 +5043,7 @@ void Player::UpdateRating(CombatRating cr)
     AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
     for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
         if ((*i)->GetMiscValue() & (1<<cr))
-            amount += int32(CalculatePct(GetStat(Stats((*i)->GetMiscValueB())), (*i)->GetAmount()));
+            amount += int32(CalculatePct(GetStat(StatType((*i)->GetMiscValueB())), (*i)->GetAmount()));
     if (amount < 0)
         amount = 0;
     SetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + AsUnderlyingType(cr), uint32(amount));
@@ -20003,7 +20003,7 @@ void Player::_SaveStats(CharacterDatabaseTransaction& trans) const
         stmt->setUInt32(index++, GetMaxPower(PowerType(i)));
 
     for (uint8 i = 0; i < MAX_STATS; ++i)
-        stmt->setUInt32(index++, GetStat(Stats(i)));
+        stmt->setUInt32(index++, GetStat(StatType(i)));
 
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         stmt->setUInt32(index++, GetResistance(SpellSchools(i)));

@@ -224,7 +224,7 @@ void Unit::UpdatePowerRegeneration(PowerType powerType)
 ########                         ########
 #######################################*/
 
-bool Player::UpdateStats(Stats stat)
+bool Player::UpdateStats(StatType stat)
 {
     if (stat > STAT_SPIRIT)
         return false;
@@ -270,7 +270,7 @@ bool Player::UpdateStats(Stats stat)
     uint32 mask = 0;
     AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
     for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
-        if (Stats((*i)->GetMiscValueB()) == stat)
+        if (StatType((*i)->GetMiscValueB()) == stat)
             mask |= (*i)->GetMiscValue();
     if (mask)
     {
@@ -338,8 +338,8 @@ bool Player::UpdateAllStats()
 {
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
     {
-        float value = GetTotalStatValue(Stats(i));
-        SetStat(Stats(i), int32(value));
+        float value = GetTotalStatValue(StatType(i));
+        SetStat(StatType(i), int32(value));
     }
 
     UpdateArmor();
@@ -396,7 +396,7 @@ void Player::UpdateArmor()
     for (AuraEffectList::const_iterator i = mResbyIntellect.begin(); i != mResbyIntellect.end(); ++i)
     {
         if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
-            value += CalculatePct(GetStat(Stats((*i)->GetMiscValueB())), (*i)->GetAmount());
+            value += CalculatePct(GetStat(StatType((*i)->GetMiscValueB())), (*i)->GetAmount());
     }
 
     value *= GetPctModifierValue(unitMod, TOTAL_PCT);
@@ -939,7 +939,7 @@ void Player::_RemoveAllStatBonuses()
 ########                         ########
 #######################################*/
 
-bool Creature::UpdateStats(Stats /*stat*/)
+bool Creature::UpdateStats(StatType /*stat*/)
 {
     return true;
 }
@@ -1096,7 +1096,7 @@ void Creature::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, 
 ########                         ########
 #######################################*/
 
-bool Guardian::UpdateStats(Stats stat)
+bool Guardian::UpdateStats(StatType stat)
 {
     if (stat >= MAX_STATS)
         return false;
@@ -1138,7 +1138,7 @@ bool Guardian::UpdateAllStats()
     UpdateMaxHealth();
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        UpdateStats(Stats(i));
+        UpdateStats(StatType(i));
 
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(PowerType(i));

@@ -774,8 +774,8 @@ class TC_GAME_API Unit : public WorldObject
         uint32 getClassMask() const { return 1 << (getClass()-1); }
         uint8 getGender() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_GENDER); }
 
-        float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(stat))); }
-        void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(stat), val); }
+        float GetStat(StatType stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(stat))); }
+        void SetStat(StatType stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(stat), val); }
         uint32 GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL); }
         void SetArmor(int32 val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
 
@@ -1281,16 +1281,16 @@ class TC_GAME_API Unit : public WorldObject
 
         void UpdateResistanceBuffModsMod(SpellSchools school);
         void InitStatBuffMods();
-        void UpdateStatBuffMod(Stats stat);
-        void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
+        void UpdateStatBuffMod(StatType stat);
+        void SetCreateStat(StatType stat, float val) { m_createStats[stat] = val; }
         void SetCreateHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_HEALTH, val); }
         uint32 GetCreateHealth() const { return GetUInt32Value(UNIT_FIELD_BASE_HEALTH); }
         void SetCreateMana(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_MANA, val); }
         uint32 GetCreateMana() const { return GetUInt32Value(UNIT_FIELD_BASE_MANA); }
         int32 GetCreatePowerValue(PowerType power) const;
-        float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0 + AsUnderlyingType(stat)); }
-        float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0 + AsUnderlyingType(stat)); }
-        float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
+        float GetPosStat(StatType stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0 + AsUnderlyingType(stat)); }
+        float GetNegStat(StatType stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0 + AsUnderlyingType(stat)); }
+        float GetCreateStat(StatType stat) const { return m_createStats[stat]; }
 
         ObjectGuid GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
         void SetChannelObjectGuid(ObjectGuid guid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, guid); }
@@ -1360,14 +1360,14 @@ class TC_GAME_API Unit : public WorldObject
         void UpdateDamagePctDoneMods(WeaponAttackType attackType);
         void UpdateAllDamagePctDoneMods();
 
-        float GetTotalStatValue(Stats stat) const;
+        float GetTotalStatValue(StatType stat) const;
         float GetTotalAuraModValue(UnitMods unitMod) const;
         SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod) const;
-        Stats GetStatByAuraGroup(UnitMods unitMod) const;
+        StatType GetStatByAuraGroup(UnitMods unitMod) const;
         PowerType GetPowerTypeByAuraGroup(UnitMods unitMod) const;
         bool CanModifyStats() const { return m_canModifyStats; }
         void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
-        virtual bool UpdateStats(Stats stat) = 0;
+        virtual bool UpdateStats(StatType stat) = 0;
         virtual bool UpdateAllStats() = 0;
         virtual void UpdateResistances(uint32 school) = 0;
         virtual void UpdateAllResistances();

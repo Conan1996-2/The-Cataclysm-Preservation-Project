@@ -4815,7 +4815,7 @@ void Unit::InitStatBuffMods()
         SetFloatValue(UNIT_FIELD_NEGSTAT0+i, 0);
 }
 
-void Unit::UpdateStatBuffMod(Stats stat)
+void Unit::UpdateStatBuffMod(StatType stat)
 {
     float modPos = 0.0f;
     float modNeg = 0.0f;
@@ -6740,7 +6740,7 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask, bool withSpellP
             if ((aurEff->GetMiscValue() & schoolMask) != 0)
             {
                 // stat used stored in miscValueB for this aura
-                Stats const usedStat = static_cast<Stats>(aurEff->GetMiscValueB());
+                StatType const usedStat = static_cast<StatType>(aurEff->GetMiscValueB());
                 DoneAdvertisedBenefit += static_cast<int32>(CalculatePct(GetStat(usedStat), aurEff->GetAmount()));
             }
         }
@@ -7326,7 +7326,7 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask, bool withSpell
         for (AuraEffectList::const_iterator i = mHealingDoneOfStatPercent.begin(); i != mHealingDoneOfStatPercent.end(); ++i)
         {
             // stat used dependent from misc value (stat index)
-            Stats usedStat = Stats((*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].MiscValue);
+            StatType usedStat = StatType((*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].MiscValue);
             advertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
         }
 
@@ -9101,7 +9101,7 @@ void Unit::UpdateAllDamagePctDoneMods()
         UpdateDamagePctDoneMods(WeaponAttackType(i));
 }
 
-float Unit::GetTotalStatValue(Stats stat) const
+float Unit::GetTotalStatValue(StatType stat) const
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_STAT_START + AsUnderlyingType(stat));
 
@@ -9150,9 +9150,9 @@ SpellSchools Unit::GetSpellSchoolByAuraGroup(UnitMods unitMod) const
     return school;
 }
 
-Stats Unit::GetStatByAuraGroup(UnitMods unitMod) const
+StatType Unit::GetStatByAuraGroup(UnitMods unitMod) const
 {
-    Stats stat = STAT_STRENGTH;
+    StatType stat = STAT_STRENGTH;
 
     switch (unitMod)
     {
