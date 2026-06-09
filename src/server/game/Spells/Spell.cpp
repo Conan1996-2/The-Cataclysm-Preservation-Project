@@ -5230,27 +5230,31 @@ void Spell::TakeCastItem()
     bool expendable = false;
     bool withoutCharges = false;
 
-    for (uint8 i = 0; i < proto->Effects.size(); ++i)
+    for (uint32 i = 0; i < proto->Effects.size(); ++i)
     {
-        // item has limited charges
-        if (proto->Effects[i].Charges)
+        ItemEffect const& itemEffect = proto->Effects[i];
+        if (itemEffect.Trigger == ITEM_SPELLTRIGGER_ON_USE && itemEffect.SpellID > 0)
         {
-            if (proto->Effects[i].Charges < 0)
-                expendable = true;
-
-            int32 charges = m_CastItem->GetSpellCharges(i);
-
-            // item has charges left for this slot
-            if (charges && proto->Effects[i].SpellID == m_spellInfo->Id)
+            // item has limited charges
+            if (itemEffect.Charges)
             {
-                (charges > 0) ? --charges : ++charges;  // abs(charges) less at 1 after use
-                if (proto->GetMaxStackSize() == 1)
-                    m_CastItem->SetSpellCharges(i, charges);
-                m_CastItem->SetState(ITEM_CHANGED, player);
-            }
+                if (itemEffect.Charges < 0)
+                    expendable = true;
 
-            // all charges used
-            withoutCharges = (charges == 0);
+                int32 charges = m_CastItem->GetSpellCharges(i);
+
+                // item has charges left for this slot
+                if (charges && itemEffect.SpellID == m_spellInfo->Id)
+                {
+                    (charges > 0) ? --charges : ++charges;  // abs(charges) less at 1 after use
+                    if (proto->GetMaxStackSize() == 1)
+                        m_CastItem->SetSpellCharges(i, charges);
+                    m_CastItem->SetState(ITEM_CHANGED, player);
+                }
+
+                // all charges used
+                withoutCharges = (charges == 0);
+            }
         }
     }
 
