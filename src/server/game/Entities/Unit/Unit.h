@@ -802,26 +802,26 @@ class TC_GAME_API Unit : public WorldObject
         int32 ModifyHealth(int32 val);
         int32 GetHealthGain(int32 dVal);
 
-        Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE)); }
-        void SetPowerType(Powers power);
-        Powers CalculateDisplayPowerType() const;
+        PowerType GetPowerType() const { return PowerType(GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE)); }
+        void SetPowerType(PowerType power);
+        PowerType CalculateDisplayPowerType() const;
         void UpdateDisplayPower();
-        int32 GetPower(Powers power) const;
-        int32 GetMinPower(Powers power) const { return power == POWER_ECLIPSE ? -100 : 0; }
-        int32 GetMaxPower(Powers power) const;
-        int32 CountPctFromMaxPower(Powers power, int32 pct) const { return CalculatePct(GetMaxPower(power), pct); }
-        void SetPower(Powers power, int32 val, bool withPowerUpdate = true);
-        void SetMaxPower(Powers power, int32 val);
+        int32 GetPower(PowerType power) const;
+        int32 GetMinPower(PowerType power) const { return power == POWER_ECLIPSE ? -100 : 0; }
+        int32 GetMaxPower(PowerType power) const;
+        int32 CountPctFromMaxPower(PowerType power, int32 pct) const { return CalculatePct(GetMaxPower(power), pct); }
+        void SetPower(PowerType power, int32 val, bool withPowerUpdate = true);
+        void SetMaxPower(PowerType power, int32 val);
         void SetPowerBarID(uint32 id) { _powerBarId = id; }
-        void Regenerate(Powers powerType, uint32 diff);
-        void UpdatePowerRegeneration(Powers powerType);
+        void Regenerate(PowerType powerType, uint32 diff);
+        void UpdatePowerRegeneration(PowerType powerType);
         void RegisterPowerTypes();
 
-        inline void SetFullPower(Powers power) { SetPower(power, GetMaxPower(power)); }
+        inline void SetFullPower(PowerType power) { SetPower(power, GetMaxPower(power)); }
 
         // returns the change in power
-        int32 ModifyPower(Powers power, int32 val, bool withPowerUpdate = true);
-        float GetPowerRegen(Powers powerType, bool isInCombat) const;
+        int32 ModifyPower(PowerType power, int32 val, bool withPowerUpdate = true);
+        float GetPowerRegen(PowerType powerType, bool isInCombat) const;
 
         virtual void RegenerateHealth() { }
 
@@ -1010,9 +1010,9 @@ class TC_GAME_API Unit : public WorldObject
 
         void SendHealSpellLog(HealInfo& healInfo, bool critical = false);
         int32 HealBySpell(HealInfo& healInfo, bool critical = false);
-        void SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powers powerType);
-        void EnergizeBySpell(Unit* victim, uint32 spellId, int32 damage, Powers powerType);
-        void EnergizeBySpell(Unit* victim, SpellInfo const* spellInfo, int32 damage, Powers powerType);
+        void SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, PowerType powerType);
+        void EnergizeBySpell(Unit* victim, uint32 spellId, int32 damage, PowerType powerType);
+        void EnergizeBySpell(Unit* victim, SpellInfo const* spellInfo, int32 damage, PowerType powerType);
 
         Aura* AddAura(uint32 spellId, Unit* target);
         Aura* AddAura(SpellInfo const* spellInfo, uint8 effMask, Unit* target);
@@ -1287,7 +1287,7 @@ class TC_GAME_API Unit : public WorldObject
         uint32 GetCreateHealth() const { return GetUInt32Value(UNIT_FIELD_BASE_HEALTH); }
         void SetCreateMana(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_MANA, val); }
         uint32 GetCreateMana() const { return GetUInt32Value(UNIT_FIELD_BASE_MANA); }
-        int32 GetCreatePowerValue(Powers power) const;
+        int32 GetCreatePowerValue(PowerType power) const;
         float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0 + AsUnderlyingType(stat)); }
         float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0 + AsUnderlyingType(stat)); }
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
@@ -1364,7 +1364,7 @@ class TC_GAME_API Unit : public WorldObject
         float GetTotalAuraModValue(UnitMods unitMod) const;
         SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod) const;
         Stats GetStatByAuraGroup(UnitMods unitMod) const;
-        Powers GetPowerTypeByAuraGroup(UnitMods unitMod) const;
+        PowerType GetPowerTypeByAuraGroup(UnitMods unitMod) const;
         bool CanModifyStats() const { return m_canModifyStats; }
         void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
         virtual bool UpdateStats(Stats stat) = 0;
@@ -1373,8 +1373,8 @@ class TC_GAME_API Unit : public WorldObject
         virtual void UpdateAllResistances();
         virtual void UpdateArmor() = 0;
         virtual void UpdateMaxHealth() = 0;
-        virtual void UpdateMaxPower(Powers power) = 0;
-        virtual uint32 GetPowerIndex(Powers power) const = 0;
+        virtual void UpdateMaxPower(PowerType power) = 0;
+        virtual uint32 GetPowerIndex(PowerType power) const = 0;
         virtual void UpdateAttackPowerAndDamage(bool ranged = false) = 0;
         virtual void UpdateDamagePhysical(WeaponAttackType attType);
         float GetTotalAttackPowerValue(WeaponAttackType attType) const;
@@ -1727,10 +1727,10 @@ class TC_GAME_API Unit : public WorldObject
         int32 _powerUpdateTimer;
         int32 _healthRegenerationTimer;
         std::array<float, MAX_POWERS_PER_CLASS> _powerFraction;
-        std::array<Powers, MAX_POWERS_PER_CLASS> _usedPowerTypes;
+        std::array<PowerType, MAX_POWERS_PER_CLASS> _usedPowerTypes;
     public:
         // Returns an array that contains information about which power type is used at which power index. MAX_POWERS implies that a power at given index is not used.
-        std::array<Powers, MAX_POWERS_PER_CLASS> const& GetUsedPowerTypes() const { return _usedPowerTypes; }
+        std::array<PowerType, MAX_POWERS_PER_CLASS> const& GetUsedPowerTypes() const { return _usedPowerTypes; }
 
     protected:
 
@@ -1827,7 +1827,7 @@ namespace Trinity
     class PowerPctOrderPred
     {
         public:
-            PowerPctOrderPred(Powers power, bool ascending = true) : _power(power), _ascending(ascending) { }
+            PowerPctOrderPred(PowerType power, bool ascending = true) : _power(power), _ascending(ascending) { }
 
             bool operator()(WorldObject const* objA, WorldObject const* objB) const
             {
@@ -1846,7 +1846,7 @@ namespace Trinity
             }
 
         private:
-            Powers const _power;
+            PowerType const _power;
             bool const _ascending;
     };
 

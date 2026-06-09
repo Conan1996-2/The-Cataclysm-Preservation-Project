@@ -1803,7 +1803,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
     Unit* target = aurApp->GetTarget();
 
     uint32 modelid = 0;
-    Powers PowerType = POWER_MANA;
+    PowerType PowerType = POWER_MANA;
     ShapeshiftForm form = ShapeshiftForm(GetMiscValue());
 
     switch (form)
@@ -3802,7 +3802,7 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, 
         return;
 
     // Update power regen values
-    aurApp->GetTarget()->UpdatePowerRegeneration(Powers(GetMiscValue()));
+    aurApp->GetTarget()->UpdatePowerRegeneration(PowerType(GetMiscValue()));
 }
 
 void AuraEffect::HandleModPowerRegenPCT(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -3896,7 +3896,7 @@ void AuraEffect::HandleAuraModIncreaseEnergy(AuraApplication const* aurApp, uint
         return;
 
     Unit* target = aurApp->GetTarget();
-    Powers powerType = Powers(GetMiscValue());
+    PowerType powerType = PowerType(GetMiscValue());
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + AsUnderlyingType(powerType));
 
     target->HandleStatFlatModifier(unitMod, TOTAL_VALUE, float(GetAmount()), apply);
@@ -3909,7 +3909,7 @@ void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurAp
 
     Unit* target = aurApp->GetTarget();
 
-    Powers powerType = Powers(GetMiscValue());
+    PowerType powerType = PowerType(GetMiscValue());
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + AsUnderlyingType(powerType));
 
     // Save old powers for further calculation
@@ -6086,7 +6086,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
 void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) const
 {
-    Powers powerType = Powers(GetMiscValue());
+    PowerType powerType = PowerType(GetMiscValue());
 
     if (!caster || !caster->IsAlive() || !target->IsAlive() || target->GetPowerType() != powerType)
         return;
@@ -6154,11 +6154,11 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
 
 void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
 {
-    Powers powerType;
+    PowerType powerType;
     if (GetMiscValue() == POWER_ALL)
         powerType = target->GetPowerType();
     else
-        powerType = Powers(GetMiscValue());
+        powerType = PowerType(GetMiscValue());
 
     if (!target->IsAlive() || !target->GetMaxPower(powerType))
         return;
@@ -6189,7 +6189,7 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
 
 void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) const
 {
-    Powers powerType = Powers(GetMiscValue());
+    PowerType powerType = PowerType(GetMiscValue());
     if (!target->IsAlive() || !target->GetMaxPower(powerType))
         return;
 
@@ -6220,7 +6220,7 @@ void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) cons
 
 void AuraEffect::HandlePeriodicPowerBurnAuraTick(Unit* target, Unit* caster) const
 {
-    Powers powerType = Powers(GetMiscValue());
+    PowerType powerType = PowerType(GetMiscValue());
 
     if (!caster || !target->IsAlive() || target->GetPowerType() != powerType)
         return;
@@ -6449,7 +6449,7 @@ void AuraEffect::HandleProcOnPowerAmountAuraProc(AuraApplication* aurApp, ProcEv
     Unit* triggerTarget = eventInfo.GetProcTarget();
 
     int32 powerAmountRequired = GetAmount();
-    Powers powerRequired = Powers(GetMiscValue());
+    PowerType powerRequired = PowerType(GetMiscValue());
 
     if (!powerRequired || !powerAmountRequired)
     {

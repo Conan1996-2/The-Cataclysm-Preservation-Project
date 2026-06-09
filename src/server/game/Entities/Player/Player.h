@@ -1748,8 +1748,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void UpdateResistances(uint32 school) override;
         void UpdateArmor() override;
         void UpdateMaxHealth() override;
-        void UpdateMaxPower(Powers power) override;
-        uint32 GetPowerIndex(Powers power) const override;
+        void UpdateMaxPower(PowerType power) override;
+        uint32 GetPowerIndex(PowerType power) const override;
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void ApplySpellPowerBonus(int32 amount, bool apply);
         void UpdateSpellDamageAndHealingBonus();

@@ -1055,7 +1055,7 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
         return;
 
-    Powers powerType = Powers(m_spellInfo->Effects[effIndex].MiscValue);
+    PowerType powerType = PowerType(m_spellInfo->Effects[effIndex].MiscValue);
 
     if (!unitTarget || !unitTarget->IsAlive() || unitTarget->GetPowerType() != powerType || damage < 0)
         return;
@@ -1127,7 +1127,7 @@ void Spell::EffectPowerBurn(SpellEffIndex effIndex)
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
         return;
 
-    Powers powerType = Powers(m_spellInfo->Effects[effIndex].MiscValue);
+    PowerType powerType = PowerType(m_spellInfo->Effects[effIndex].MiscValue);
 
     if (!unitTarget || !unitTarget->IsAlive() || unitTarget->GetPowerType() != powerType || damage < 0)
         return;
@@ -1576,7 +1576,7 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
         return;
 
-    Powers power = Powers(m_spellInfo->Effects[effIndex].MiscValue);
+    PowerType power = PowerType(m_spellInfo->Effects[effIndex].MiscValue);
     if (unitTarget->GetMaxPower(power) == 0)
         return;
 
@@ -1637,7 +1637,7 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
         return;
 
-    Powers power = Powers(m_spellInfo->Effects[effIndex].MiscValue);
+    PowerType power = PowerType(m_spellInfo->Effects[effIndex].MiscValue);
     uint32 maxPower = unitTarget->GetMaxPower(power);
     if (!maxPower)
         return;

@@ -3654,7 +3654,7 @@ int32 SpellInfo::CalcPowerCost(WorldObject const* caster, SpellSchoolMask school
             return unitCaster->GetHealth();
         // Else drain all power
         if (PowerType < MAX_POWERS)
-            return unitCaster->GetPower(Powers(PowerType));
+            return unitCaster->GetPower(static_cast<::PowerType>(PowerType));
 
         TC_LOG_ERROR("spells", "SpellInfo::CalcPowerCost: Unknown power type '%d' in spell %d", PowerType, Id);
         return 0;
@@ -3693,7 +3693,7 @@ int32 SpellInfo::CalcPowerCost(WorldObject const* caster, SpellSchoolMask school
                 case POWER_RAGE:
                 case POWER_FOCUS:
                 case POWER_ENERGY:
-                    ressource = unitCaster->GetMaxPower(Powers(PowerType));
+                    ressource = unitCaster->GetMaxPower(static_cast<::PowerType>(PowerType));
                     break;
                 case POWER_RUNE:
                 case POWER_RUNIC_POWER:

@@ -1092,7 +1092,7 @@ CharSectionsEntry const* DBCManager::GetCharSectionEntry(uint8 race, CharSection
     return nullptr;
 }
 
-uint32 DBCManager::GetPowerIndexByClass(Powers power, uint32 classId)
+uint32 DBCManager::GetPowerIndexByClass(PowerType power, uint32 classId)
 {
     return PowersByClass[classId][power];
 }
@@ -1332,7 +1332,7 @@ EmotesTextSoundEntry const* DBCManager::FindTextSoundEmoteFor(uint32 emote, uint
     return itr != sEmotesTextSoundMap.end() ? itr->second : nullptr;
 }
 
-/*static*/ float DBCManager::GetBasePowerRegen(Powers powerType, bool isInCombat, uint32 powerBarId)
+/*static*/ float DBCManager::GetBasePowerRegen(PowerType powerType, bool isInCombat, uint32 powerBarId)
 {
     if (powerType != POWER_ALTERNATE_POWER)
     {
@@ -1360,7 +1360,7 @@ EmotesTextSoundEntry const* DBCManager::FindTextSoundEmoteFor(uint32 emote, uint
     return 0.f;
 }
 
-/*static*/ bool DBCManager::IsPowerTypeAffectedByHaste(Powers powerType)
+/*static*/ bool DBCManager::IsPowerTypeAffectedByHaste(PowerType powerType)
 {
     switch (powerType)
     {

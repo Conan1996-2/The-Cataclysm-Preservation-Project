@@ -124,7 +124,7 @@ class TC_GAME_API Guardian : public Minion
         void UpdateResistances(uint32 school) override;
         void UpdateArmor() override;
         void UpdateMaxHealth() override;
-        void UpdateMaxPower(Powers power) override;
+        void UpdateMaxPower(PowerType power) override;
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateDamagePhysical(WeaponAttackType attType) override;
 

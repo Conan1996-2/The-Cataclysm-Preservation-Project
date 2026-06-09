@@ -57,7 +57,7 @@ class TC_GAME_API Totem : public Minion
         void UpdateResistances(uint32 /*school*/) override { }
         void UpdateArmor() override { }
         void UpdateMaxHealth() override { }
-        void UpdateMaxPower(Powers /*power*/) override { }
+        void UpdateMaxPower(PowerType /*power*/) override { }
         void UpdateAttackPowerAndDamage(bool /*ranged*/) override { }
         void UpdateDamagePhysical(WeaponAttackType /*attType*/) override { }
 

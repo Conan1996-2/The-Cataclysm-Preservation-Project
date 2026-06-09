@@ -5243,7 +5243,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 /*SwingType
     SendAttackStateUpdate(&dmgInfo);
 }
 
-void Unit::SetPowerType(Powers power)
+void Unit::SetPowerType(PowerType power)
 {
     if (GetPowerType() == power)
         return;
@@ -5292,9 +5292,9 @@ void Unit::SetPowerType(Powers power)
     }
 }
 
-Powers Unit::CalculateDisplayPowerType() const
+PowerType Unit::CalculateDisplayPowerType() const
 {
-    Powers displayPower = POWER_MANA;
+    PowerType displayPower = POWER_MANA;
     switch (GetShapeshiftForm())
     {
         case FORM_GHOUL:
@@ -5312,12 +5312,12 @@ Powers Unit::CalculateDisplayPowerType() const
         {
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
             if (cEntry && cEntry->DisplayPower < MAX_POWERS)
-                displayPower = Powers(cEntry->DisplayPower);
+                displayPower = PowerType(cEntry->DisplayPower);
 
             if (Vehicle* vehicle = GetVehicleKit())
             {
                 if (PowerDisplayEntry const* powerDisplay = sPowerDisplayStore.LookupEntry(vehicle->GetVehicleInfo()->PowerDisplayID[0])) // To-do: 4.x has 3 power display id fields.
-                    displayPower = Powers(powerDisplay->ActualType);
+                    displayPower = PowerType(powerDisplay->ActualType);
                 else if (getClass() == CLASS_ROGUE)
                     displayPower = POWER_ENERGY;
             }
@@ -6267,7 +6267,7 @@ int32 Unit::HealBySpell(HealInfo& healInfo, bool critical /*= false*/)
     return healInfo.GetEffectiveHeal();
 }
 
-void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powers powerType)
+void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, PowerType powerType)
 {
     WorldPackets::CombatLog::SpellEnergizeLog packet;
     packet.TargetGUID = victim->GetGUID();
@@ -6279,13 +6279,13 @@ void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powe
     SendMessageToSet(packet.Write(), true);
 }
 
-void Unit::EnergizeBySpell(Unit* victim, uint32 spellId, int32 damage, Powers powerType)
+void Unit::EnergizeBySpell(Unit* victim, uint32 spellId, int32 damage, PowerType powerType)
 {
     if (SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId))
         EnergizeBySpell(victim, info, damage, powerType);
 }
 
-void Unit::EnergizeBySpell(Unit* victim, SpellInfo const* spellInfo, int32 damage, Powers powerType)
+void Unit::EnergizeBySpell(Unit* victim, SpellInfo const* spellInfo, int32 damage, PowerType powerType)
 {
     victim->ModifyPower(powerType, damage, false);
     victim->GetThreatManager().ForwardThreatForAssistingMe(this, float(damage) / 2, spellInfo, true);
@@ -8206,7 +8206,7 @@ int32 Unit::GetHealthGain(int32 dVal)
 }
 
 // returns negative amount on power reduction
-int32 Unit::ModifyPower(Powers power, int32 dVal, bool withPowerUpdate /*= true*/)
+int32 Unit::ModifyPower(PowerType power, int32 dVal, bool withPowerUpdate /*= true*/)
 {
     int32 gain = 0;
 
@@ -8239,7 +8239,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal, bool withPowerUpdate /*= true*
 }
 
 // Based on client function
-float Unit::GetPowerRegen(Powers powerType, bool isInCombat) const
+float Unit::GetPowerRegen(PowerType powerType, bool isInCombat) const
 {
     uint32 powerSlot = MAX_POWERS;
     float totalRegeneration = 0.f;
@@ -9169,7 +9169,7 @@ Stats Unit::GetStatByAuraGroup(UnitMods unitMod) const
     return stat;
 }
 
-Powers Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
+PowerType Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
 {
     switch (unitMod)
     {
@@ -9295,7 +9295,7 @@ void Unit::SetMaxHealth(uint32 val)
         SetHealth(val);
 }
 
-int32 Unit::GetPower(Powers power) const
+int32 Unit::GetPower(PowerType power) const
 {
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
@@ -9304,7 +9304,7 @@ int32 Unit::GetPower(Powers power) const
     return GetUInt32Value(UNIT_FIELD_POWER1 + powerIndex);
 }
 
-int32 Unit::GetMaxPower(Powers power) const
+int32 Unit::GetMaxPower(PowerType power) const
 {
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
@@ -9313,7 +9313,7 @@ int32 Unit::GetMaxPower(Powers power) const
     return GetInt32Value(UNIT_FIELD_MAXPOWER1 + powerIndex);
 }
 
-void Unit::SetPower(Powers power, int32 val, bool withPowerUpdate /*= true*/)
+void Unit::SetPower(PowerType power, int32 val, bool withPowerUpdate /*= true*/)
 {
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
@@ -9350,7 +9350,7 @@ void Unit::SetPower(Powers power, int32 val, bool withPowerUpdate /*= true*/)
     }
 }
 
-void Unit::SetMaxPower(Powers power, int32 val)
+void Unit::SetMaxPower(PowerType power, int32 val)
 {
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
@@ -9379,7 +9379,7 @@ void Unit::SetMaxPower(Powers power, int32 val)
         SetPower(power, val);
 }
 
-void Unit::Regenerate(Powers powerType, uint32 diff)
+void Unit::Regenerate(PowerType powerType, uint32 diff)
 {
     uint32 maxValue = GetMaxPower(powerType);
     if (!maxValue)
@@ -9476,11 +9476,11 @@ void Unit::RegisterPowerTypes()
 {
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
     {
-        uint32 powerIndex = GetPowerIndex(Powers(i));
+        uint32 powerIndex = GetPowerIndex(PowerType(i));
         if (powerIndex == MAX_POWERS || powerIndex == MAX_POWERS_PER_CLASS)
             continue;
 
-        _usedPowerTypes[powerIndex] = static_cast<Powers>(i);
+        _usedPowerTypes[powerIndex] = static_cast<PowerType>(i);
     }
 }
 
@@ -10444,7 +10444,7 @@ void Unit::ApplyHasteRegenMod(float val, bool apply)
 
     SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, amount);
 
-    for (Powers powerType : GetUsedPowerTypes())
+    for (PowerType powerType : GetUsedPowerTypes())
     {
         if (powerType == MAX_POWERS || GetPowerIndex(powerType) == MAX_POWERS)
             continue;

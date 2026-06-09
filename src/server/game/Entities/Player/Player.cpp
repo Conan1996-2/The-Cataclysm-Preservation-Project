@@ -2478,7 +2478,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // save new stats
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
-        SetMaxPower(Powers(i), GetCreatePowerValue(Powers(i)));
+        SetMaxPower(PowerType(i), GetCreatePowerValue(PowerType(i)));
 
     SetMaxHealth(basehp);                     // stamina bonus will applied later
 
@@ -17164,11 +17164,11 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
     uint32 loadedPowers = 0;
     for (uint32 i = 0; i < MAX_POWERS; ++i)
     {
-        if (GetPowerIndex(Powers(i)) != MAX_POWERS)
+        if (GetPowerIndex(PowerType(i)) != MAX_POWERS)
         {
             uint32 savedPower = fields[53 + loadedPowers].GetUInt32();
             uint32 maxPower = GetUInt32Value(UNIT_FIELD_MAXPOWER1 + loadedPowers);
-            SetPower(Powers(i), (savedPower > maxPower) ? maxPower : savedPower);
+            SetPower(PowerType(i), (savedPower > maxPower) ? maxPower : savedPower);
             if (++loadedPowers >= MAX_POWERS_PER_CLASS)
                 break;
         }
@@ -19041,7 +19041,7 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create /* = false
         uint32 storedPowers = 0;
         for (uint32 i = 0; i < MAX_POWERS; ++i)
         {
-            if (GetPowerIndex(Powers(i)) != MAX_POWERS)
+            if (GetPowerIndex(PowerType(i)) != MAX_POWERS)
             {
                 stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_POWER1 + storedPowers));
                 if (++storedPowers >= MAX_POWERS_PER_CLASS)
@@ -19177,7 +19177,7 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create /* = false
         uint32 storedPowers = 0;
         for (uint32 i = 0; i < MAX_POWERS; ++i)
         {
-            if (GetPowerIndex(Powers(i)) != MAX_POWERS)
+            if (GetPowerIndex(PowerType(i)) != MAX_POWERS)
             {
                 stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_POWER1 + storedPowers));
                 if (++storedPowers >= MAX_POWERS_PER_CLASS)
@@ -20000,7 +20000,7 @@ void Player::_SaveStats(CharacterDatabaseTransaction& trans) const
     stmt->setUInt32(index++, GetMaxHealth());
 
     for (uint8 i = 0; i < MAX_POWERS_PER_CLASS; ++i)
-        stmt->setUInt32(index++, GetMaxPower(Powers(i)));
+        stmt->setUInt32(index++, GetMaxPower(PowerType(i)));
 
     for (uint8 i = 0; i < MAX_STATS; ++i)
         stmt->setUInt32(index++, GetStat(Stats(i)));
@@ -26680,7 +26680,7 @@ void Player::ActivateSpec(uint8 spec)
         }));
     }
 
-    Powers pw = GetPowerType();
+    PowerType pw = GetPowerType();
     if (pw != POWER_MANA)
         SetPower(POWER_MANA, 0); // Mana must be 0 even if it isn't the active power type.
 

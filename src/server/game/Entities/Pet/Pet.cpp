@@ -759,7 +759,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
             SetStatFlatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(cinfo->resistance[i]));
 
-    Powers powerType = CalculateDisplayPowerType();
+    PowerType powerType = CalculateDisplayPowerType();
 
     // Health, mana, armor and resistance
     PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(creature_ID, petlevel);

@@ -87,7 +87,7 @@ void Unit::UpdateDamagePhysical(WeaponAttackType attType)
     }
 }
 
-int32 Unit::GetCreatePowerValue(Powers power) const
+int32 Unit::GetCreatePowerValue(PowerType power) const
 {
     switch (power)
     {
@@ -120,7 +120,7 @@ int32 Unit::GetCreatePowerValue(Powers power) const
     return 0;
 }
 
-void Unit::UpdatePowerRegeneration(Powers powerType)
+void Unit::UpdatePowerRegeneration(PowerType powerType)
 {
     uint32 powerIndex = GetPowerIndex(powerType);
     if ((powerIndex == MAX_POWERS || powerIndex >= MAX_POWERS_PER_CLASS) && powerType != POWER_RUNE)
@@ -348,7 +348,7 @@ bool Player::UpdateAllStats()
     UpdateMaxHealth();
 
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
-        UpdateMaxPower(Powers(i));
+        UpdateMaxPower(PowerType(i));
 
     UpdateAllRatings();
     UpdateAllCritPercentages();
@@ -442,12 +442,12 @@ void Player::UpdateMaxHealth()
     SetMaxHealth((uint32)value);
 }
 
-uint32 Player::GetPowerIndex(Powers power) const
+uint32 Player::GetPowerIndex(PowerType power) const
 {
     return sDBCManager.GetPowerIndexByClass(power, getClass());
 }
 
-void Player::UpdateMaxPower(Powers power)
+void Player::UpdateMaxPower(PowerType power)
 {
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS || powerIndex >= MAX_POWERS_PER_CLASS)
@@ -951,7 +951,7 @@ bool Creature::UpdateAllStats()
     UpdateAttackPowerAndDamage(true);
 
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
-        UpdateMaxPower(Powers(i));
+        UpdateMaxPower(PowerType(i));
 
     UpdateAllResistances();
 
@@ -981,7 +981,7 @@ void Creature::UpdateMaxHealth()
     SetMaxHealth(uint32(value));
 }
 
-uint32 Creature::GetPowerIndex(Powers power) const
+uint32 Creature::GetPowerIndex(PowerType power) const
 {
     if (power == GetPowerType())
         return 0;
@@ -990,7 +990,7 @@ uint32 Creature::GetPowerIndex(Powers power) const
     return MAX_POWERS;
 }
 
-void Creature::UpdateMaxPower(Powers power)
+void Creature::UpdateMaxPower(PowerType power)
 {
     if (GetPowerIndex(power) == MAX_POWERS)
         return;
@@ -1141,7 +1141,7 @@ bool Guardian::UpdateAllStats()
         UpdateStats(Stats(i));
 
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
-        UpdateMaxPower(Powers(i));
+        UpdateMaxPower(PowerType(i));
 
     UpdateAllResistances();
 
@@ -1188,7 +1188,7 @@ void Guardian::UpdateMaxHealth()
     SetMaxHealth((uint32)value);
 }
 
-void Guardian::UpdateMaxPower(Powers power)
+void Guardian::UpdateMaxPower(PowerType power)
 {
     if (GetPowerIndex(power) == MAX_POWERS)
         return;

@@ -238,7 +238,7 @@ enum Stats
 
 #define MAX_STATS                        5
 
-enum Powers
+enum PowerType
 {
     POWER_MANA                          = 0,
     POWER_RAGE                          = 1,

@@ -858,7 +858,7 @@ void Aura::Update(uint32 diff, Unit* caster)
                 {
                     m_timeCla += 1000 - diff;
 
-                    Powers powertype = Powers(m_spellInfo->PowerType);
+                    PowerType powertype = PowerType(m_spellInfo->PowerType);
                     if (powertype == POWER_HEALTH)
                     {
                         if (int32(caster->GetHealth()) > manaPerSecond)

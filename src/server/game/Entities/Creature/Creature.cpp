@@ -1432,7 +1432,7 @@ void Creature::UpdateLevelDependantStats()
     SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, (float)health);
 
     // mana
-    Powers powerType = CalculateDisplayPowerType();
+    PowerType powerType = CalculateDisplayPowerType();
     SetCreateMana(stats->BaseMana);
     SetStatPctModifier(UnitMods(UNIT_MOD_POWER_START + AsUnderlyingType(powerType)), BASE_PCT, cInfo->ModMana * cInfo->ModManaExtra);
     RegisterPowerTypes();
