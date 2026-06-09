@@ -5240,8 +5240,8 @@ void Spell::TakeCastItem()
 
             int32 charges = m_CastItem->GetSpellCharges(i);
 
-            // item has charges left
-            if (charges)
+            // item has charges left for this slot
+            if (charges && proto->Effects[i].SpellID == m_spellInfo->Id)
             {
                 (charges > 0) ? --charges : ++charges;  // abs(charges) less at 1 after use
                 if (proto->GetMaxStackSize() == 1)
