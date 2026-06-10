@@ -79,6 +79,7 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellPackets.h"
+#include "Stats.h"
 #include "TemporarySummon.h"
 #include "Totem.h"
 #include "Transport.h"
@@ -306,7 +307,8 @@ Unit::Unit(bool isWorldObject) :
     m_charmer(nullptr), m_charmed(nullptr),
     i_motionMaster(std::make_unique<MotionMaster>(this)), m_vehicle(nullptr),
     m_unitTypeMask(UNIT_MASK_NONE), m_isEngaged(false), m_combatManager(this), m_threatManager(this),
-    i_AI(nullptr), m_aiLocked(false), m_spellHistory(std::make_unique<SpellHistory>(this))
+    i_AI(nullptr), m_aiLocked(false), m_spellHistory(std::make_unique<SpellHistory>(this)),
+    _stats(std::make_unique<Stats>(this))
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -347,8 +349,6 @@ Unit::Unit(bool isWorldObject) :
         m_weaponDamage[i][MINDAMAGE] = BASE_MINDAMAGE;
         m_weaponDamage[i][MAXDAMAGE] = BASE_MAXDAMAGE;
     }
-
-    m_createStats.fill(0.0f);
 
     m_attacking = nullptr;
     m_modMeleeHitChance = 0.0f;
@@ -4807,82 +4807,6 @@ void Unit::UpdateResistanceBuffModsMod(SpellSchools school)
     SetFloatValue(UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + AsUnderlyingType(school), modNeg);
 }
 
-void Unit::InitStatBuffMods()
-{
-    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetFloatValue(UNIT_FIELD_POSSTAT0+i, 0);
-    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetFloatValue(UNIT_FIELD_NEGSTAT0+i, 0);
-}
-
-void Unit::UpdateStatBuffMod(StatType stat)
-{
-    float modPos = 0.0f;
-    float modNeg = 0.0f;
-    float currentValue = 0.0f;
-    float previousValue = 0.0f;
-
-    UnitMods const unitMod = static_cast<UnitMods>(UNIT_MOD_STAT_START + AsUnderlyingType(stat));
-
-    // includes value from items and enchantments
-    float baseModValue = GetFlatModifierValue(unitMod, BASE_VALUE);
-    if (IsGuardian())
-        baseModValue = static_cast<Guardian*>(this)->GetBonusStatFromOwner(stat);
-
-    if (baseModValue >= 0.0f)
-        modPos = baseModValue;
-    else
-        modNeg = baseModValue;
-
-    previousValue = baseModValue;
-
-    // SPELL_AURA_MOD_PERCENT_STAT affects the base_value as well as the create stat
-    previousValue += GetCreateStat(stat);
-    float multiplier = GetTotalAuraMultiplier(SPELL_AURA_MOD_PERCENT_STAT, [stat](AuraEffect const* aurEff) -> bool
-    {
-        if (aurEff->GetMiscValue() == -1 || aurEff->GetMiscValue() == stat)
-            return true;
-        return false;
-    });
-
-    currentValue = previousValue * multiplier;
-    if (G3D::fuzzyGe(currentValue, previousValue))
-        modPos += currentValue - previousValue;
-    else
-        modNeg -= previousValue - currentValue;
-
-    // total_value offsets
-    previousValue += GetTotalAuraModifier(SPELL_AURA_MOD_STAT, [&](AuraEffect const* aurEff) -> bool
-    {
-        if (aurEff->GetMiscValue() < 0 || aurEff->GetMiscValue() == stat)
-        {
-            if (aurEff->GetAmount() > 0)
-                modPos += aurEff->GetAmount();
-            else
-                modNeg += aurEff->GetAmount();
-            return true;
-        }
-        return false;
-    });
-
-    // total_pct multiplier
-    multiplier = GetTotalAuraMultiplier(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, [stat](AuraEffect const* aurEff) -> bool
-    {
-        if (!aurEff->GetMiscValueB() || aurEff->GetMiscValueB() & (1 << stat))
-            return true;
-        return false;
-    });
-
-    currentValue = previousValue * multiplier;
-    if (G3D::fuzzyGe(currentValue, previousValue))
-        modPos += currentValue - previousValue;
-    else
-        modNeg -= previousValue - currentValue;
-
-    SetFloatValue(UNIT_FIELD_POSSTAT0 + AsUnderlyingType(stat), modPos);
-    SetFloatValue(UNIT_FIELD_NEGSTAT0 + AsUnderlyingType(stat), modNeg);
-}
-
 void Unit::_RegisterDynObject(DynamicObject* dynObj)
 {
     m_dynObj.push_back(dynObj);
@@ -6727,7 +6651,7 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask, bool withSpellP
 
         // Check if we are ever using mana - PaperDollFrame.lua
         if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
-            DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+            DoneAdvertisedBenefit += std::max(0, int32(GetStat(StatType::Intellect)) - 10);  // spellpower from intellect
 
         // Spell Power bonus from SPELL_AURA_MOD_SPELL_POWER_PCT
         if (withSpellPowerPctMod)
@@ -7315,7 +7239,7 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask, bool withSpell
 
         // Check if we are ever using mana - PaperDollFrame.lua
         if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
-            advertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+            advertisedBenefit += std::max(0, int32(GetStat(StatType::Intellect)) - 10);  // spellpower from intellect
 
         // Spell Power bonus from SPELL_AURA_MOD_SPELL_POWER_PCT
         if (withSpellPowerPctMod)
@@ -8972,13 +8896,6 @@ void Unit::UpdateUnitMod(UnitMods unitMod)
 
     switch (unitMod)
     {
-        case UNIT_MOD_STAT_STRENGTH:
-        case UNIT_MOD_STAT_AGILITY:
-        case UNIT_MOD_STAT_STAMINA:
-        case UNIT_MOD_STAT_INTELLECT:
-        case UNIT_MOD_STAT_SPIRIT:
-            UpdateStats(GetStatByAuraGroup(unitMod));
-            break;
         case UNIT_MOD_ARMOR:
             UpdateArmor();
             break;
@@ -9101,19 +9018,6 @@ void Unit::UpdateAllDamagePctDoneMods()
         UpdateDamagePctDoneMods(WeaponAttackType(i));
 }
 
-float Unit::GetTotalStatValue(StatType stat) const
-{
-    UnitMods unitMod = UnitMods(UNIT_MOD_STAT_START + AsUnderlyingType(stat));
-
-    // value = ((base_value * base_pct) + total_value) * total_pct
-    float value  = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreateStat(stat);
-    value *= GetPctModifierValue(unitMod, BASE_PCT);
-    value += GetFlatModifierValue(unitMod, TOTAL_VALUE);
-    value *= GetPctModifierValue(unitMod, TOTAL_PCT);
-
-    return value;
-}
-
 float Unit::GetTotalAuraModValue(UnitMods unitMod) const
 {
     if (unitMod >= UNIT_MOD_END)
@@ -9148,25 +9052,6 @@ SpellSchools Unit::GetSpellSchoolByAuraGroup(UnitMods unitMod) const
     }
 
     return school;
-}
-
-StatType Unit::GetStatByAuraGroup(UnitMods unitMod) const
-{
-    StatType stat = STAT_STRENGTH;
-
-    switch (unitMod)
-    {
-        case UNIT_MOD_STAT_STRENGTH:    stat = STAT_STRENGTH;      break;
-        case UNIT_MOD_STAT_AGILITY:     stat = STAT_AGILITY;       break;
-        case UNIT_MOD_STAT_STAMINA:     stat = STAT_STAMINA;       break;
-        case UNIT_MOD_STAT_INTELLECT:   stat = STAT_INTELLECT;     break;
-        case UNIT_MOD_STAT_SPIRIT:      stat = STAT_SPIRIT;        break;
-
-        default:
-            break;
-    }
-
-    return stat;
 }
 
 PowerType Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
@@ -10735,7 +10620,6 @@ bool Unit::InitTamedPet(Pet* pet, uint8 level, uint32 spell_id)
     // this enables pet details window (Shift+P)
     pet->InitPetCreateSpells();
     //pet->InitLevelupSpellsForLevel();
-    pet->UpdateAllStats();
     pet->SetFullHealth();
     pet->CastSpell(pet, 99289, true); // Energize
     pet->SetReactState(REACT_ASSIST);
@@ -14382,4 +14266,17 @@ void Unit::ProcessItemCast(PendingSpellCastRequest const& castRequest, SpellCast
 void Unit::SetGameClientMovingMe(GameClient* gameClientMovingMe)
 {
     _gameClientMovingMe = gameClientMovingMe;
+}
+
+Stats& Unit::GetStats() const
+{
+    return *_stats;
+}
+
+int32 Unit::GetStat(StatType statType) const
+{
+    if (statType < StatType::Strength)
+        return 0;
+
+    return GetInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(statType));
 }

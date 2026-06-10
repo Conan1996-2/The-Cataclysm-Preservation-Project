@@ -847,7 +847,7 @@ class spell_sha_mana_tide_totem : public AuraScript
             return;
 
         if (Unit* summoner = caster->ToTempSummon()->GetSummoner())
-            amount = CalculatePct(summoner->GetStat(STAT_SPIRIT), amount);
+            amount = CalculatePct(summoner->GetStat(StatType::Spirit), amount);
         else
             amount = 0;
     }

@@ -55,6 +55,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Stats.h"
 #include "StringConvert.h"
 #include "TemporarySummon.h"
 #include "TerrainMgr.h"
@@ -3282,10 +3283,9 @@ void ObjectMgr::LoadPetLevelInfo()
         pLevelInfo->mana   = fields[3].GetUInt16();
         pLevelInfo->armor  = fields[9].GetUInt32();
 
-        for (int i = 0; i < MAX_STATS; i++)
-        {
-            pLevelInfo->stats[i] = fields[i+4].GetUInt16();
-        }
+
+        for (StatType stat : AllStats)
+            pLevelInfo->stats[AsUnderlyingType(stat)] = fields[AsUnderlyingType(stat) + 4].GetUInt16();
 
         ++count;
     }
@@ -3705,7 +3705,7 @@ void ObjectMgr::LoadPlayerInfo()
     {
         struct RaceStats
         {
-            std::array<int16, MAX_STATS> StatModifier = { };
+            std::array<int16, AsUnderlyingType(StatType::Max)> StatModifier = { };
         };
 
         std::array<RaceStats, MAX_RACES> raceStatModifiers = { };
@@ -3732,8 +3732,8 @@ void ObjectMgr::LoadPlayerInfo()
                 continue;
             }
 
-            for (uint8 i = 0; i < MAX_STATS; ++i)
-                raceStatModifiers[current_race].StatModifier[i] = fields[i + 1].GetInt16();
+            for (StatType stat : AllStats)
+                raceStatModifiers[current_race].StatModifier[AsUnderlyingType(stat)] = fields[AsUnderlyingType(stat) + 1].GetInt16();
 
         } while (raceStatsResult->NextRow());
 
@@ -3781,8 +3781,8 @@ void ObjectMgr::LoadPlayerInfo()
                         playerInfo->levelInfo = std::make_unique<PlayerLevelInfo[]>(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
 
                     PlayerLevelInfo& levelInfo = playerInfo->levelInfo[current_level - 1];
-                    for (uint8 i = 0; i < MAX_STATS; i++)
-                        levelInfo.stats[i] = fields[i + 2].GetUInt16() + raceStatModifiers[race].StatModifier[i];
+                    for (StatType stat : AllStats)
+                        levelInfo.stats[AsUnderlyingType(stat)] = fields[AsUnderlyingType(stat) + 2].GetUInt16() + raceStatModifiers[race].StatModifier[AsUnderlyingType(stat)];
                 }
             }
 
@@ -3940,73 +3940,73 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
     // base data (last known level)
     *info = ASSERT_NOTNULL(Trinity::Containers::MapGetValuePtr(_playerInfo, { Races(race), Classes(_class) }))->levelInfo[sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) - 1];
 
-    // if conversion from uint32 to uint8 causes unexpected behaviour, change lvl to uint32
+    // if conversion from uint32 to uint8 causes unexpected behavior, change lvl to uint32
     for (uint8 lvl = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)-1; lvl < level; ++lvl)
     {
         switch (_class)
         {
             case CLASS_WARRIOR:
-                info->stats[STAT_STRENGTH]  += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-                info->stats[STAT_STAMINA]   += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-                info->stats[STAT_AGILITY]   += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-                info->stats[STAT_INTELLECT] += (lvl > 9 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_SPIRIT]    += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 9 && !(lvl%2) ? 1: 0);
                 break;
             case CLASS_PALADIN:
-                info->stats[STAT_STRENGTH]  += (lvl > 3  ? 1: 0);
-                info->stats[STAT_STAMINA]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-                info->stats[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
-                info->stats[STAT_INTELLECT] += (lvl > 6 && (lvl%2) ? 1: 0);
-                info->stats[STAT_SPIRIT]    += (lvl > 7 ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 3  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 6 && (lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 7 ? 1: 0);
                 break;
             case CLASS_HUNTER:
-                info->stats[STAT_STRENGTH]  += (lvl > 4  ? 1: 0);
-                info->stats[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
-                info->stats[STAT_AGILITY]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-                info->stats[STAT_INTELLECT] += (lvl > 8 && (lvl%2) ? 1: 0);
-                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 4  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 4  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 8 && (lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
                 break;
             case CLASS_ROGUE:
-                info->stats[STAT_STRENGTH]  += (lvl > 5  ? 1: 0);
-                info->stats[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
-                info->stats[STAT_AGILITY]   += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
-                info->stats[STAT_INTELLECT] += (lvl > 8 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 5  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 4  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 8 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
                 break;
             case CLASS_PRIEST:
-                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
-                info->stats[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
-                info->stats[STAT_INTELLECT] += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
-                info->stats[STAT_SPIRIT]    += (lvl > 3  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 5  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 3  ? 1: 0);
                 break;
             case CLASS_SHAMAN:
-                info->stats[STAT_STRENGTH]  += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-                info->stats[STAT_STAMINA]   += (lvl > 4 ? 1: 0);
-                info->stats[STAT_AGILITY]   += (lvl > 7 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_INTELLECT] += (lvl > 5 ? 1: 0);
-                info->stats[STAT_SPIRIT]    += (lvl > 4 ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 4 ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 7 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 5 ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 4 ? 1: 0);
                 break;
             case CLASS_MAGE:
-                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
-                info->stats[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_INTELLECT] += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
-                info->stats[STAT_SPIRIT]    += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 5  ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
                 break;
             case CLASS_WARLOCK:
-                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_STAMINA]   += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
-                info->stats[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
-                info->stats[STAT_INTELLECT] += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
-                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
                 break;
             case CLASS_DRUID:
-                info->stats[STAT_STRENGTH]  += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
-                info->stats[STAT_STAMINA]   += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
-                info->stats[STAT_AGILITY]   += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
-                info->stats[STAT_INTELLECT] += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
-                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Strength)]  += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Stamina)]   += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Agility)]   += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Intellect)] += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
+                info->stats[AsUnderlyingType(StatType::Spirit)]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
         }
     }
 }

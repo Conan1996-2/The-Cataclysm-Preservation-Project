@@ -672,7 +672,7 @@ typedef std::vector<PlayerCreateInfoItem> PlayerCreateInfoItems;
 
 struct PlayerLevelInfo
 {
-    uint16 stats[MAX_STATS] = { };
+    uint16 stats[5] = { };
 };
 
 typedef std::vector<uint32> PlayerCreateInfoSpells;
@@ -714,7 +714,7 @@ struct PlayerInfo
 
 struct PetLevelInfo
 {
-    uint16 stats[MAX_STATS] = { };
+    uint16 stats[5] = { };
     uint16 health = 0;
     uint16 mana = 0;
     uint16 armor = 0;

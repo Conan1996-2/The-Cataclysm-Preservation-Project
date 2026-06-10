@@ -28,6 +28,7 @@
 #include "SpellHistory.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
+#include "Stats.h"
 #include "Unit.h"
 #include "Util.h"
 #include "Group.h"
@@ -296,7 +297,6 @@ bool Pet::LoadPetData(Player* owner, uint32 petEntry, uint32 petnumber, bool cur
     }
 
     CleanupActionBar();                                     // remove unknown spells from action bar after load
-    UpdateAllStats();
     SetFullHealth();                                        // Set full health and mana after pet scaling auras has been applied
 
     if (IsHunterPet())
@@ -773,25 +773,27 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         if (pInfo->armor > 0)
             SetStatFlatModifier(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
 
-        for (uint8 stat = 0; stat < MAX_STATS; ++stat)
-            SetCreateStat(StatType(stat), float(pInfo->stats[stat]));
+        for (StatType stat : AllStats)
+            GetStats().SetBaseStatValue(stat, pInfo->stats[AsUnderlyingType(stat)]);
     }
     else                                            // not exist in DB, use some default fake data
     {
         // remove elite bonuses included in DB values
         // remove elite bonuses included in DB values
-        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
+        CreatureBaseStats const* baseStats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
         float healthmod = _GetHealthMod(cinfo->rank);
-        uint32 basehp = stats->GenerateHealth(cinfo);
+        uint32 basehp = baseStats->GenerateHealth(cinfo);
         uint32 health = uint32(basehp * healthmod);
 
         SetCreateHealth(health);
-        SetCreateMana(stats->BaseMana);
-        SetCreateStat(STAT_STRENGTH, 22);
-        SetCreateStat(STAT_AGILITY, 22);
-        SetCreateStat(STAT_STAMINA, 25);
-        SetCreateStat(STAT_INTELLECT, 28);
-        SetCreateStat(STAT_SPIRIT, 27);
+        SetCreateMana(baseStats->BaseMana);
+
+        Stats& stats = GetStats();
+        stats.SetBaseStatValue(StatType::Strength, 22);
+        stats.SetBaseStatValue(StatType::Agility, 22);
+        stats.SetBaseStatValue(StatType::Stamina, 25);
+        stats.SetBaseStatValue(StatType::Intellect, 28);
+        stats.SetBaseStatValue(StatType::Spirit, 27);
 
         SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
         SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
@@ -897,7 +899,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier / 14);
 
                     SetStatFlatModifier(UNIT_MOD_ARMOR, BASE_VALUE, float(GetOwner()->GetArmor()) * 0.35f);  // Bonus Armor (35% of player armor)
-                    SetStatFlatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(GetOwner()->GetStat(STAT_STAMINA)) * 0.3f);  // Bonus Stamina (30% of player stamina)
                     if (!HasAura(58877))        // Spirit Hunt
                         AddAura(58877, this);
                     if (!HasAura(61783))        // Feral Pet Scaling
@@ -997,8 +998,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             break;
         }
     }
-
-    UpdateAllStats();
 
     SetFullHealth();
     SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
@@ -1876,7 +1875,7 @@ void Pet::CastPetAura(PetAura const* aura)
     args.TriggerFlags = TRIGGERED_FULL_MASK;
 
     if (auraId == 35696)                                      // Demonic Knowledge
-        args.AddSpellMod(SPELLVALUE_BASE_POINT0, CalculatePct(aura->GetDamage(), GetStat(STAT_STAMINA) + GetStat(STAT_INTELLECT)));
+        args.AddSpellMod(SPELLVALUE_BASE_POINT0, CalculatePct(aura->GetDamage(), GetStat(StatType::Stamina) + GetStat(StatType::Intellect)));
 
     CastSpell(this, auraId, args);
 }

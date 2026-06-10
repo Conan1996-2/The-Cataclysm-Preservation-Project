@@ -19,10 +19,34 @@
 #define _Stats_h__
 
 #include "Define.h"
+#include "Util.h"
+#include <array>
 
 class Unit;
+enum AuraType : uint32;
 
-class TC_GAME_API //Stats
+enum class StatType : int8
+{
+    PrimaryStat = -2,
+    AllStats    = -1,
+    Strength    = 0,
+    Agility     = 1,
+    Stamina     = 2,
+    Intellect   = 3,
+    Spirit      = 4,
+    Max
+};
+
+static constexpr std::array<StatType, AsUnderlyingType(StatType::Max)> AllStats =
+{
+    StatType::Strength,
+    StatType::Agility,
+    StatType::Stamina,
+    StatType::Intellect,
+    StatType::Spirit
+};
+
+class TC_GAME_API Stats
 {
 public:
     Stats() = delete;
@@ -31,6 +55,31 @@ public:
 
     ~Stats();
     explicit Stats(Unit* owner);
+
+    int32 GetBaseStatValue(StatType statType) const;
+    void SetBaseStatValue(StatType statType, int32 value);
+
+    void AddBaseStatModifier(StatType statType, int32 value);
+    void RemoveBaseStatModifier(StatType statType, int32 value);
+
+    void UpdateBaseStatMultiplier(StatType statType);
+    void UpdateTotalStatModifier(StatType statType);
+    void UpdateTotalStatMultiplier(StatType statType);
+
+    StatType GetPrimaryStat() const;
+
+private:
+    Unit* _owner;
+    std::array<int32, AsUnderlyingType(StatType::Max)> _baseStats;
+    std::array<int32, AsUnderlyingType(StatType::Max)> _baseStatModifiers;
+    std::array<double, AsUnderlyingType(StatType::Max)> _basePctMultipliers;
+    std::array<int32, AsUnderlyingType(StatType::Max)> _totalModifiers;
+    std::array<double, AsUnderlyingType(StatType::Max)> _totalPctMultipliers;
+
+    void updateStat(StatType statType);
+    float getAuraMultiplierForStatType(AuraType auraType, StatType statType) const;
+    int32 getAuraModifierForStatType(AuraType auraType, StatType statType) const;
+
 };
 
 #endif  // _Stats_h__

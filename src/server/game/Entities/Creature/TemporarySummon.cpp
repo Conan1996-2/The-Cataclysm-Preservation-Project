@@ -380,7 +380,7 @@ bool Minion::IsWarlockMinion() const
 Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) : Minion(properties, owner, isWorldObject)
 , m_bonusSpellDamage(0)
 {
-    memset(m_statFromOwner, 0, sizeof(float)*MAX_STATS);
+    memset(m_statFromOwner, 0, sizeof(float)*AsUnderlyingType(StatType::Max));
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
     if (properties && SummonTitle(properties->Title) == SummonTitle::Pet)
     {

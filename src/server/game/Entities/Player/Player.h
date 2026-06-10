@@ -1742,8 +1742,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         float GetHealthBonusFromStamina();
         float GetManaBonusFromIntellect();
 
-        bool UpdateStats(StatType stat) override;
-        bool UpdateAllStats() override;
         void ApplySpellPenetrationBonus(int32 amount, bool apply);
         void UpdateResistances(uint32 school) override;
         void UpdateArmor() override;

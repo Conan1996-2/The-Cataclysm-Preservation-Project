@@ -631,7 +631,15 @@ bool Creature::UpdateEntry(uint32 entry, CreatureData const* data /*= nullptr*/,
         SetStatFlatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(cInfo->resistance[SPELL_SCHOOL_ARCANE]));
 
         SetCanModifyStats(true);
-        UpdateAllStats();
+
+        UpdateMaxHealth();
+        UpdateAttackPowerAndDamage();
+        UpdateAttackPowerAndDamage(true);
+
+        for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+            UpdateMaxPower(PowerType(i));
+
+        UpdateAllResistances();
     }
 
     // checked and error show at loading templates

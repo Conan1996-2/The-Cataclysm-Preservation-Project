@@ -4388,7 +4388,7 @@ class spell_gen_vengeance : public AuraScript
 
         if (!caster->GetAura(SPELL_VENGEANCE_TRIGGERED, caster->GetGUID()))
         {
-            uint32 healthCap = CalculatePct(caster->GetCreateHealth(), 10) + caster->GetStat(STAT_STAMINA);
+            uint32 healthCap = CalculatePct(caster->GetCreateHealth(), 10) + caster->GetStat(StatType::Stamina);
             uint32 damageBonus = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), 33);
             int32 bp = std::min<int32>(damageBonus, healthCap);
             caster->CastSpell(caster, SPELL_VENGEANCE_TRIGGERED, CastSpellExtraArgs(true).AddSpellBP0(bp).AddSpellMod(SPELLVALUE_BASE_POINT1, bp).AddSpellMod(SPELLVALUE_BASE_POINT2, bp));
@@ -4448,7 +4448,7 @@ class spell_gen_vengeance_triggered : public AuraScript
             }
         }
 
-        uint32 healthCap = CalculatePct(target->GetCreateHealth(), 10) + target->GetStat(STAT_STAMINA);
+        uint32 healthCap = CalculatePct(target->GetCreateHealth(), 10) + target->GetStat(StatType::Stamina);
         damageLastTwoSeconds = std::min<int32>(healthCap, CalculatePct(damageLastTwoSeconds, 33));
         if (damageLastTwoSeconds)
             target->CastSpell(target, SPELL_VENGEANCE_TRIGGERED, CastSpellExtraArgs(true).AddSpellBP0(damageLastTwoSeconds).AddSpellMod(SPELLVALUE_BASE_POINT1, damageLastTwoSeconds).AddSpellMod(SPELLVALUE_BASE_POINT2, damageLastTwoSeconds));

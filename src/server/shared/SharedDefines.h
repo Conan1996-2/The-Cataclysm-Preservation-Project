@@ -227,17 +227,6 @@ enum MoneyConstants
     GOLD   = SILVER*100
 };
 
-enum StatType
-{
-    STAT_STRENGTH                      = 0,
-    STAT_AGILITY                       = 1,
-    STAT_STAMINA                       = 2,
-    STAT_INTELLECT                     = 3,
-    STAT_SPIRIT                        = 4
-};
-
-#define MAX_STATS                        5
-
 enum PowerType
 {
     POWER_MANA                          = 0,

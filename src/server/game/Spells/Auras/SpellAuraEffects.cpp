@@ -16,6 +16,11 @@
  */
 
 #include "SpellAuraEffects.h"
+
+#include <G3D/g3dmath.h>
+
+#include <numeric>
+
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -41,14 +46,13 @@
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Stats.h"
 #include "ThreatManager.h"
 #include "Unit.h"
 #include "Util.h"
 #include "Vehicle.h"
 #include "Weather.h"
 #include "WorldPacket.h"
-#include <G3D/g3dmath.h>
-#include <numeric>
 
 class Aura;
 //
@@ -3567,71 +3571,30 @@ void AuraEffect::HandleAuraModStat(AuraApplication const* aurApp, uint8 mode, bo
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
-    if (GetMiscValue() < -2 || GetMiscValue() > 4)
+    StatType stat = static_cast<StatType>(GetMiscValue());
+    if (stat < StatType::PrimaryStat || stat >= StatType::Max)
     {
         TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_STAT ", GetId(), GetEffIndex(), GetMiscValue());
         return;
     }
 
     Unit* target = aurApp->GetTarget();
-    int32 spellGroupVal = target->GetHighestExclusiveSameEffectSpellGroupValue(this, SPELL_AURA_MOD_STAT, true, GetMiscValue());
-    if (abs(spellGroupVal) >= abs(GetAmount()))
-        return;
-
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-    {
-        // -1 or -2 is all stats (misc < -2 checked in function beginning)
-        if (GetMiscValue() < 0 || GetMiscValue() == i)
-        {
-            if (spellGroupVal)
-            {
-                target->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(spellGroupVal), !apply);
-                if (target->GetTypeId() == TYPEID_PLAYER || target->IsPet())
-                    target->UpdateStatBuffMod(StatType(i));
-            }
-
-            target->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(GetAmount()), apply);
-            if (target->GetTypeId() == TYPEID_PLAYER || target->IsPet())
-                target->UpdateStatBuffMod(StatType(i));
-        }
-    }
+    target->GetStats().UpdateTotalStatModifier(stat);
 }
 
 void AuraEffect::HandleModPercentStat(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
+    StatType stat = static_cast<StatType>(GetMiscValue());
+    if (stat < StatType::PrimaryStat || stat >= StatType::Max)
+    {
+        TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_STAT ", GetId(), GetEffIndex(), GetMiscValue());
+        return;
+    }
 
     Unit* target = aurApp->GetTarget();
-
-    if (GetMiscValue() < -1 || GetMiscValue() > 4)
-    {
-        TC_LOG_ERROR("spells", "WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
-        return;
-    }
-
-    // only players have base stats
-    if (target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-    {
-        if (GetMiscValue() == i || GetMiscValue() == -1)
-        {
-            if (apply)
-                target->ApplyStatPctModifier(UnitMods(UNIT_MOD_STAT_START + i), BASE_PCT, float(GetAmount()));
-            else
-            {
-                float amount = target->GetTotalAuraMultiplier(SPELL_AURA_MOD_PERCENT_STAT, [i](AuraEffect const* aurEff) -> bool
-                {
-                    if (aurEff->GetMiscValue() == i || aurEff->GetMiscValue() == -1)
-                        return true;
-                    return false;
-                });
-                target->SetStatPctModifier(UnitMods(UNIT_MOD_STAT_START + i), BASE_PCT, amount);
-            }
-        }
-    }
+    target->GetStats().UpdateBaseStatMultiplier(stat);
 }
 
 void AuraEffect::HandleModSpellDamagePercentFromStat(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
@@ -3713,48 +3676,15 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
-    if (GetMiscValue() < -1 || GetMiscValue() > 4)
+    StatType stat = static_cast<StatType>(GetMiscValue());
+    if (stat < StatType::PrimaryStat || stat >= StatType::Max)
     {
-        TC_LOG_ERROR("spells", "WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_STAT ", GetId(), GetEffIndex(), GetMiscValue());
         return;
     }
 
     Unit* target = aurApp->GetTarget();
-
-    // save current health state
-    float healthPct = target->GetHealthPct();
-    bool zeroHealth = !target->IsAlive();
-
-    // players in corpse state may mean two different states:
-    /// 1. player just died but did not release (in this case health == 0)
-    /// 2. player is corpse running (ie ghost) (in this case health == 1)
-    if (target->getDeathState() == CORPSE)
-        zeroHealth = (target->GetHealth() == 0);
-
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-    {
-        if ((GetMiscValueB() & 1 << i) || !GetMiscValueB()) // affect the same stats
-        {
-            float amount = target->GetTotalAuraMultiplier(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, [i](AuraEffect const* aurEff) -> bool
-            {
-                if ((aurEff->GetMiscValueB() & 1 << i) || aurEff->GetMiscValueB() == -1)
-                    return true;
-                return false;
-            });
-
-            if (target->GetPctModifierValue(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT) == amount)
-                continue;
-
-            target->SetStatPctModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, amount);
-            if (target->GetTypeId() == TYPEID_PLAYER || target->IsPet())
-                target->UpdateStatBuffMod(StatType(i));
-        }
-    }
-
-    // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_IS_ABILITY 0x00000010 flag)
-    // this check is total bullshit i think
-    if (((GetMiscValueB() & 1 << STAT_STAMINA) || GetMiscValueB() == - 1) && m_spellInfo->HasAttribute(SPELL_ATTR0_IS_ABILITY))
-        target->SetHealth(std::max<uint32>(CalculatePct(target->GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1)));
+    target->GetStats().UpdateTotalStatMultiplier(stat);
 }
 
 void AuraEffect::HandleAuraModResistenceOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const

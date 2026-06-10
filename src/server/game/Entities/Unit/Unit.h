@@ -18,19 +18,21 @@
 #ifndef __UNIT_H
 #define __UNIT_H
 
-#include "Object.h"
-#include "CombatManager.h"
-#include "SpellAuraDefines.h"
-#include "SpellDefines.h"
-#include "ThreatManager.h"
-#include "Timer.h"
-#include "UnitDefines.h"
-#include "Util.h"
 #include <array>
 #include <forward_list>
 #include <map>
 #include <memory>
 #include <stack>
+
+#include "CombatManager.h"
+#include "Object.h"
+#include "SpellAuraDefines.h"
+#include "SpellDefines.h"
+#include "Stats.h"
+#include "ThreatManager.h"
+#include "Timer.h"
+#include "UnitDefines.h"
+#include "Util.h"
 
 constexpr uint32 WORLD_TRIGGER = 12999;
 
@@ -87,6 +89,7 @@ class Spell;
 class SpellCastTargets;
 class SpellHistory;
 class SpellInfo;
+class Stats;
 class Totem;
 class Transport;
 class TransportBase;
@@ -161,11 +164,6 @@ enum WeaponDamageRange
 
 enum UnitMods
 {
-    UNIT_MOD_STAT_STRENGTH,                                 // UNIT_MOD_STAT_STRENGTH..UNIT_MOD_STAT_SPIRIT must be in existed order, it's accessed by index values of Stats enum.
-    UNIT_MOD_STAT_AGILITY,
-    UNIT_MOD_STAT_STAMINA,
-    UNIT_MOD_STAT_INTELLECT,
-    UNIT_MOD_STAT_SPIRIT,
     UNIT_MOD_HEALTH,
     UNIT_MOD_MANA,                                          // UNIT_MOD_MANA..UNIT_MOD_RUNIC_POWER must be in existed order, it's accessed by index values of Powers enum.
     UNIT_MOD_RAGE,
@@ -192,8 +190,6 @@ enum UnitMods
     UNIT_MOD_DAMAGE_RANGED,
     UNIT_MOD_END,
     // synonyms
-    UNIT_MOD_STAT_START = UNIT_MOD_STAT_STRENGTH,
-    UNIT_MOD_STAT_END = UNIT_MOD_STAT_SPIRIT + 1,
     UNIT_MOD_RESISTANCE_START = UNIT_MOD_ARMOR,
     UNIT_MOD_RESISTANCE_END = UNIT_MOD_RESISTANCE_ARCANE + 1,
     UNIT_MOD_POWER_START = UNIT_MOD_MANA,
@@ -774,8 +770,6 @@ class TC_GAME_API Unit : public WorldObject
         uint32 getClassMask() const { return 1 << (getClass()-1); }
         uint8 getGender() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_GENDER); }
 
-        float GetStat(StatType stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(stat))); }
-        void SetStat(StatType stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(stat), val); }
         uint32 GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL); }
         void SetArmor(int32 val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
 
@@ -1280,17 +1274,11 @@ class TC_GAME_API Unit : public WorldObject
         int32 GetMaxNegativeAuraModifierByAffectMask(AuraType auraType, SpellInfo const* affectedSpell) const;
 
         void UpdateResistanceBuffModsMod(SpellSchools school);
-        void InitStatBuffMods();
-        void UpdateStatBuffMod(StatType stat);
-        void SetCreateStat(StatType stat, float val) { m_createStats[stat] = val; }
         void SetCreateHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_HEALTH, val); }
         uint32 GetCreateHealth() const { return GetUInt32Value(UNIT_FIELD_BASE_HEALTH); }
         void SetCreateMana(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_MANA, val); }
         uint32 GetCreateMana() const { return GetUInt32Value(UNIT_FIELD_BASE_MANA); }
         int32 GetCreatePowerValue(PowerType power) const;
-        float GetPosStat(StatType stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0 + AsUnderlyingType(stat)); }
-        float GetNegStat(StatType stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0 + AsUnderlyingType(stat)); }
-        float GetCreateStat(StatType stat) const { return m_createStats[stat]; }
 
         ObjectGuid GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
         void SetChannelObjectGuid(ObjectGuid guid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, guid); }
@@ -1360,15 +1348,11 @@ class TC_GAME_API Unit : public WorldObject
         void UpdateDamagePctDoneMods(WeaponAttackType attackType);
         void UpdateAllDamagePctDoneMods();
 
-        float GetTotalStatValue(StatType stat) const;
         float GetTotalAuraModValue(UnitMods unitMod) const;
         SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod) const;
-        StatType GetStatByAuraGroup(UnitMods unitMod) const;
         PowerType GetPowerTypeByAuraGroup(UnitMods unitMod) const;
         bool CanModifyStats() const { return m_canModifyStats; }
         void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
-        virtual bool UpdateStats(StatType stat) = 0;
-        virtual bool UpdateAllStats() = 0;
         virtual void UpdateResistances(uint32 school) = 0;
         virtual void UpdateAllResistances();
         virtual void UpdateArmor() = 0;
@@ -1665,8 +1649,6 @@ class TC_GAME_API Unit : public WorldObject
 
         void _UpdateAutoRepeatSpell();
 
-        std::array<float, MAX_STATS>  m_createStats;
-
         AttackerSet m_attackers;
         Unit* m_attacking;
 
@@ -1819,6 +1801,12 @@ class TC_GAME_API Unit : public WorldObject
         std::unordered_map<MovementChangeType, PlayerMovementPendingChange> m_pendingMovementChanges;
 
         /* Player Movement fields END*/
+
+    private:
+        std::unique_ptr<Stats> _stats;
+    public:
+        Stats& GetStats() const;
+        int32 GetStat(StatType statType) const;
 };
 
 namespace Trinity

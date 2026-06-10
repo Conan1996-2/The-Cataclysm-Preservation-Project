@@ -150,9 +150,9 @@ void Unit::UpdatePowerRegeneration(PowerType powerType)
             baseRegen += powerRegenMod;
 
             // SpiritRegen = Spirit * GTRegenMpPerSpt * Sqrt(INT) * 5
-            float spiritRegen = GetStat(STAT_SPIRIT) * DBCManager::GetGtOCTRegenMPPerSpirit(getClass(), getLevel());
-            if (GetStat(STAT_INTELLECT) > 0.0f)
-                spiritRegen *= std::sqrt(GetStat(STAT_INTELLECT));
+            float spiritRegen = GetStat(StatType::Spirit) * DBCManager::GetGtOCTRegenMPPerSpirit(getClass(), getLevel());
+            if (GetStat(StatType::Intellect) > 0.0f)
+                spiritRegen *= std::sqrt(GetStat(StatType::Intellect));
 
             // SPELL_AURA_MOD_POWER_REGEN_PERCENT pct bonus
             baseRegen *= powerRegenModPct;
@@ -224,64 +224,6 @@ void Unit::UpdatePowerRegeneration(PowerType powerType)
 ########                         ########
 #######################################*/
 
-bool Player::UpdateStats(StatType stat)
-{
-    if (stat > STAT_SPIRIT)
-        return false;
-
-    // value = ((base_value * base_pct) + total_value) * total_pct
-    float value  = GetTotalStatValue(stat);
-
-    SetStat(stat, int32(value));
-
-    switch (stat)
-    {
-        case STAT_AGILITY:
-            UpdateArmor();
-            UpdateAllCritPercentages();
-            UpdateDodgePercentage();
-            break;
-        case STAT_STAMINA:
-            UpdateMaxHealth();
-            break;
-        case STAT_INTELLECT:
-            UpdateMaxPower(POWER_MANA);
-            UpdateAllSpellCritChances();
-            UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
-            break;
-        case STAT_SPIRIT:
-            break;
-        default:
-            break;
-    }
-
-    if (stat == STAT_STRENGTH)
-        UpdateAttackPowerAndDamage(false);
-    else if (stat == STAT_AGILITY)
-    {
-        UpdateAttackPowerAndDamage(false);
-        UpdateAttackPowerAndDamage(true);
-    }
-
-    UpdateSpellDamageAndHealingBonus();
-    UpdatePowerRegeneration(POWER_MANA);
-
-    // Update ratings in exist SPELL_AURA_MOD_RATING_FROM_STAT and only depends from stat
-    uint32 mask = 0;
-    AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
-    for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
-        if (StatType((*i)->GetMiscValueB()) == stat)
-            mask |= (*i)->GetMiscValue();
-    if (mask)
-    {
-        for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
-            if (mask & (1 << rating))
-                ApplyRatingMod(CombatRating(rating), 0, true);
-    }
-
-    return true;
-}
-
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 {
     if (HasAuraType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT))
@@ -334,37 +276,6 @@ void Player::UpdateSpellHealingPercentTaken()
     SetFloatValue(PLAYER_FIELD_MOD_HEALING_PCT, TakenTotalMod);
 }
 
-bool Player::UpdateAllStats()
-{
-    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-    {
-        float value = GetTotalStatValue(StatType(i));
-        SetStat(StatType(i), int32(value));
-    }
-
-    UpdateArmor();
-    // calls UpdateAttackPowerAndDamage() in UpdateArmor for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
-    UpdateAttackPowerAndDamage(true);
-    UpdateMaxHealth();
-
-    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
-        UpdateMaxPower(PowerType(i));
-
-    UpdateAllRatings();
-    UpdateAllCritPercentages();
-    UpdateAllSpellCritChances();
-    UpdateBlockPercentage();
-    UpdateParryPercentage();
-    UpdateDodgePercentage();
-    UpdateSpellDamageAndHealingBonus();
-    UpdatePowerRegeneration(POWER_MANA);
-    UpdateExpertise(BASE_ATTACK);
-    UpdateExpertise(OFF_ATTACK);
-    UpdateAllResistances();
-
-    return true;
-}
-
 void Player::ApplySpellPenetrationBonus(int32 amount, bool apply)
 {
     ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -amount, apply);
@@ -412,7 +323,7 @@ float Player::GetHealthBonusFromStamina()
     if (gtOCTHpPerStaminaEntry const* hpBase = sGtOCTHpPerStaminaStore.LookupEntry((getClass() - 1) * GT_MAX_LEVEL + getLevel() - 1))
         ratio = hpBase->ratio;
 
-    float stamina = GetStat(STAT_STAMINA);
+    float stamina = GetStat(StatType::Stamina);
     float baseStam = std::min(20.0f, stamina);
     float moreStam = stamina - baseStam;
 
@@ -422,7 +333,7 @@ float Player::GetHealthBonusFromStamina()
 float Player::GetManaBonusFromIntellect()
 {
     // Taken from PaperDollFrame.lua - 4.3.4.15595
-    float intellect = GetStat(STAT_INTELLECT);
+    float intellect = GetStat(StatType::Intellect);
 
     float baseInt = std::min(20.0f, intellect);
     float moreInt = intellect - baseInt;
@@ -479,15 +390,15 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     uint16 index_mult = ranged ? UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER : UNIT_FIELD_ATTACK_POWER_MULTIPLIER;
 
     if (ranged)
-        val2 = (level + std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f)) * entry->RangedAttackPowerPerAgility;
+        val2 = (level + std::max(GetStat(StatType::Agility) - 10.0f, 0.0f)) * entry->RangedAttackPowerPerAgility;
     else
     {
-        float strengthValue = std::max((GetStat(STAT_STRENGTH) - 10.0f) * entry->AttackPowerPerStrength, 0.0f);
-        float agilityValue = std::max((GetStat(STAT_AGILITY) - 10.0f) * entry->AttackPowerPerAgility, 0.0f);
+        float strengthValue = std::max((GetStat(StatType::Strength) - 10.0f) * entry->AttackPowerPerStrength, 0.0f);
+        float agilityValue = std::max((GetStat(StatType::Agility) - 10.0f) * entry->AttackPowerPerAgility, 0.0f);
 
         // Druids in Bear and Cat form get two points attack power per agility point
         if (GetShapeshiftForm() == FORM_BEAR || GetShapeshiftForm() == FORM_CAT)
-            agilityValue = std::max((GetStat(STAT_AGILITY) - 10.0f) * 2, 0.0f);
+            agilityValue = std::max((GetStat(StatType::Agility) - 10.0f) * 2, 0.0f);
 
         val2 = strengthValue + agilityValue;
     }
@@ -917,8 +828,6 @@ void Player::_ApplyAllStatBonuses()
     _ApplyAllItemMods();
 
     SetCanModifyStats(true);
-
-    UpdateAllStats();
 }
 
 void Player::_RemoveAllStatBonuses()
@@ -929,8 +838,6 @@ void Player::_RemoveAllStatBonuses()
     _RemoveAllAuraStatMods();
 
     SetCanModifyStats(true);
-
-    UpdateAllStats();
 }
 
 /*#######################################
@@ -938,25 +845,6 @@ void Player::_RemoveAllStatBonuses()
 ########    MOBS STAT SYSTEM     ########
 ########                         ########
 #######################################*/
-
-bool Creature::UpdateStats(StatType /*stat*/)
-{
-    return true;
-}
-
-bool Creature::UpdateAllStats()
-{
-    UpdateMaxHealth();
-    UpdateAttackPowerAndDamage();
-    UpdateAttackPowerAndDamage(true);
-
-    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
-        UpdateMaxPower(PowerType(i));
-
-    UpdateAllResistances();
-
-    return true;
-}
 
 void Creature::UpdateResistances(uint32 school)
 {
@@ -1096,58 +984,6 @@ void Creature::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, 
 ########                         ########
 #######################################*/
 
-bool Guardian::UpdateStats(StatType stat)
-{
-    if (stat >= MAX_STATS)
-        return false;
-
-    // value = ((base_value * base_pct) + total_value) * total_pct
-    float value  = GetTotalStatValue(stat);
-    //ApplyStatBuffMod(stat, m_statFromOwner[stat], false);
-    float ownersBonus = 0.0f;
-
-    SetStat(stat, int32(value));
-    m_statFromOwner[stat] = ownersBonus;
-    UpdateStatBuffMod(stat);
-
-    switch (stat)
-    {
-        case STAT_STRENGTH:
-            UpdateAttackPowerAndDamage();
-            break;
-        case STAT_AGILITY:
-            UpdateArmor();
-            break;
-        case STAT_STAMINA:
-            UpdateMaxHealth();
-            break;
-        case STAT_INTELLECT:
-            UpdateMaxPower(POWER_MANA);
-            break;
-        case STAT_SPIRIT:
-            break;
-        default:
-            break;
-    }
-
-    return true;
-}
-
-bool Guardian::UpdateAllStats()
-{
-    UpdateMaxHealth();
-
-    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        UpdateStats(StatType(i));
-
-    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
-        UpdateMaxPower(PowerType(i));
-
-    UpdateAllResistances();
-
-    return true;
-}
-
 void Guardian::UpdateResistances(uint32 school)
 {
     if (school > SPELL_SCHOOL_NORMAL)
@@ -1177,7 +1013,7 @@ void Guardian::UpdateArmor()
 void Guardian::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
-    float stamina = GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA);
+    float stamina = GetStat(StatType::Stamina) - GetStats().GetBaseStatValue(StatType::Stamina);
     float multiplicator = 10.0f;
 
     float value = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
@@ -1195,7 +1031,7 @@ void Guardian::UpdateMaxPower(PowerType power)
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + AsUnderlyingType(power));
 
-    float addValue = (power == POWER_MANA) ? GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT) : 0.0f;
+    float addValue = (power == POWER_MANA) ? GetStat(StatType::Intellect) - GetStats().GetBaseStatValue(StatType::Intellect) : 0.0f;
     float multiplicator = 15.0f;
 
     float value  = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreatePowerValue(power);
@@ -1212,7 +1048,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
         return;
 
     float ap_per_strength = 2.0f;
-    float val = GetStat(STAT_STRENGTH) - 20.0f;
+    float val = GetStat(StatType::Strength) - 20.0f;
 
     val *= ap_per_strength;
 
