@@ -16,11 +16,6 @@
  */
 
 #include "SpellAuraEffects.h"
-
-#include <G3D/g3dmath.h>
-
-#include <numeric>
-
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -53,6 +48,9 @@
 #include "Vehicle.h"
 #include "Weather.h"
 #include "WorldPacket.h"
+
+#include <G3D/g3dmath.h>
+#include <numeric>
 
 class Aura;
 //
@@ -3586,10 +3584,11 @@ void AuraEffect::HandleModPercentStat(AuraApplication const* aurApp, uint8 mode,
 {
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
+
     StatType stat = static_cast<StatType>(GetMiscValue());
     if (stat < StatType::PrimaryStat || stat >= StatType::Max)
     {
-        TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_STAT ", GetId(), GetEffIndex(), GetMiscValue());
+        TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_PERCENT_STAT ", GetId(), GetEffIndex(), GetMiscValue());
         return;
     }
 
@@ -3679,7 +3678,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     StatType stat = static_cast<StatType>(GetMiscValue());
     if (stat < StatType::PrimaryStat || stat >= StatType::Max)
     {
-        TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_STAT ", GetId(), GetEffIndex(), GetMiscValue());
+        TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE ", GetId(), GetEffIndex(), GetMiscValue());
         return;
     }
 

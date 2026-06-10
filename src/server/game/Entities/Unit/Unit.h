@@ -18,12 +18,6 @@
 #ifndef __UNIT_H
 #define __UNIT_H
 
-#include <array>
-#include <forward_list>
-#include <map>
-#include <memory>
-#include <stack>
-
 #include "CombatManager.h"
 #include "Object.h"
 #include "SpellAuraDefines.h"
@@ -33,6 +27,12 @@
 #include "Timer.h"
 #include "UnitDefines.h"
 #include "Util.h"
+
+#include <array>
+#include <forward_list>
+#include <map>
+#include <memory>
+#include <stack>
 
 constexpr uint32 WORLD_TRIGGER = 12999;
 
