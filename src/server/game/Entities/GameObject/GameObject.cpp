@@ -2292,10 +2292,8 @@ void GameObject::Use(Unit* user)
             if (Player* player = user->ToPlayer())
                 sOutdoorPvPMgr->HandleCustomSpell(player, spellId, this);
 
-            // Only count successful spell casts as uses
-            WorldObject* caster = this;
-            if (m_goInfo->spellcaster.playerCast != 0 && user->IsPlayer())
-                caster = user;
+            if (!m_goInfo->spellcaster.playerCast)
+                spellCaster = nullptr;
 
             addUse = true;
             break;
