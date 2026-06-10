@@ -26,6 +26,8 @@ Stats::~Stats() = default;
 Stats::Stats(Unit* owner) : _owner(owner), _baseStats({ }), _baseStatModifiers({ }), _basePctMultipliers({ }),
     _totalModifiers({ }), _totalPctMultipliers({ })
 {
+    _basePctMultipliers.fill(1.0);
+    _totalModifiers.fill(1.0);
 }
 
 /// Returns the unmodified base value of the specified stat.
