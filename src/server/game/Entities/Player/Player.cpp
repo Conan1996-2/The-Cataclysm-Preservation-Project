@@ -12793,9 +12793,9 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
             break;
         case ITEM_MOD_STAMINA:
             if (apply)
-                GetStats().AddBaseStatModifier(StatType::Spirit, addValue);
+                GetStats().AddBaseStatModifier(StatType::Stamina, addValue);
             else
-                GetStats().RemoveBaseStatModifier(StatType::Spirit, addValue);
+                GetStats().RemoveBaseStatModifier(StatType::Stamina, addValue);
             break;
         case ITEM_MOD_DEFENSE_SKILL_RATING:
             ApplyRatingMod(CR_DEFENSE_SKILL, int32(addValue), apply);
