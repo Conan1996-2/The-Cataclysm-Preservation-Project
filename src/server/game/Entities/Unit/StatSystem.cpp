@@ -351,7 +351,9 @@ void Player::UpdateMaxHealth()
     value += GetFlatModifierValue(unitMod, TOTAL_VALUE) + GetHealthBonusFromStamina();
     value *= GetPctModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxHealth((uint32)value);
+    float healthPct = GetHealthPct();
+    SetMaxHealth(static_cast<uint32>(value));
+    SetHealth(std::max<uint32>(1, CalculatePct(GetMaxHealth(), healthPct)));
 }
 
 uint32 Player::GetPowerIndex(PowerType power) const

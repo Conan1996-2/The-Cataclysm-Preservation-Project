@@ -2246,12 +2246,12 @@ void Player::GiveLevel(uint8 level)
 
     UpdateSkillsForLevel();
 
+    SetCreateHealth(basehp);
+    SetCreateMana(basemana);
+
     // save base values (bonuses already included in stored stats)
     for (StatType stat : AllStats)
         GetStats().SetBaseStatValue(stat, info.stats[AsUnderlyingType(stat)]);
-
-    SetCreateHealth(basehp);
-    SetCreateMana(basemana);
 
     InitTalentForLevel();
     InitTaxiNodesForLevel();
@@ -2376,14 +2376,12 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // reset size before reapply auras
     SetObjectScale(1.0f);
 
+    SetCreateHealth(basehp);
+    SetCreateMana(basemana);
+
     // save base values (bonuses already included in stored stats
     for (StatType stat : AllStats)
         GetStats().SetBaseStatValue(stat, info.stats[AsUnderlyingType(stat)]);
-
-    SetCreateHealth(basehp);
-
-    //set create powers
-    SetCreateMana(basemana);
 
     //reset rating fields values
     for (uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_COMBAT_RATING_1 + MAX_COMBAT_RATING; ++index)
@@ -2469,8 +2467,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // save new stats
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         SetMaxPower(PowerType(i), GetCreatePowerValue(PowerType(i)));
-
-    SetMaxHealth(basehp);                     // stamina bonus will applied later
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
@@ -17085,6 +17081,9 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
     SetGuidValue(PLAYER_DUEL_ARBITER, ObjectGuid::Empty);
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);
 
+    RegisterPowerTypes();
+    UpdateDisplayPower();
+
     // reset stats before loading any modifiers
     InitStatsForLevel();
     InitGlyphsForLevel();
@@ -17116,8 +17115,6 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
-    RegisterPowerTypes();
-    UpdateDisplayPower();
     _LoadTalents(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENTS));
     _LoadSpells(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELLS));
 
