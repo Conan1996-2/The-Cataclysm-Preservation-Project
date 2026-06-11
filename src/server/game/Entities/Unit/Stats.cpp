@@ -226,7 +226,7 @@ void Stats::updateStat(StatType statType)
     else
         negStatValue += totalModifier;
 
-    int32 totalValue = baseTotalValue + baseModifier;
+    int32 totalValue = baseTotalValue + totalModifier;
 
     // ==== Calculate the total value (Total pct multipliers)
     double totalPctMultiplier = _totalPctMultipliers[AsUnderlyingType(statType)];
