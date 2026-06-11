@@ -234,7 +234,7 @@ void Stats::updateStat(StatType statType)
 
     // ==== Calculate the total base value (Base pct multiplier auras)
     double basePctMultiplier = _basePctMultipliers[AsUnderlyingType(statType)];
-    int32 baseTotalValue = static_cast<int32>(flatStatValue * basePctMultiplier);
+    int32 baseTotalValue = static_cast<int32>(std::round(flatStatValue * basePctMultiplier));
     if (flatStatValue < baseTotalValue)
         posStatValue += baseTotalValue - flatStatValue;
     else
@@ -251,7 +251,7 @@ void Stats::updateStat(StatType statType)
 
     // ==== Calculate the total value (Total pct multipliers)
     double totalPctMultiplier = _totalPctMultipliers[AsUnderlyingType(statType)];
-    int32 statValue = static_cast<int32>(totalValue * totalPctMultiplier);
+    int32 statValue = static_cast<int32>(std::round(totalValue * totalPctMultiplier));
     if (totalValue < statValue)
         posStatValue += statValue - totalValue;
     else
