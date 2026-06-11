@@ -274,6 +274,26 @@ void Stats::updateStat(StatType statType)
         default:
             break;
     }
+
+    // Whenever a stat changes make sure that SPELL_AURA_MOD_RATING_FROM_STAT is being updated as well
+    // since it directly depends on the latest stat value
+    if (_owner->IsPlayer() && _owner->HasAuraType(SPELL_AURA_MOD_RATING_FROM_STAT))
+    {
+        uint32 combatRatingMask = 0;
+        for (AuraEffect const* aurEff : _owner->GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT))
+        {
+            if (static_cast<StatType>(aurEff->GetMiscValueB()) == statType)
+                combatRatingMask |= aurEff->GetMiscValue();
+        }
+
+        Player* player = Object::ToPlayer(_owner);
+        if (combatRatingMask)
+        {
+            for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
+                if ((combatRatingMask & (1 << rating)) != 0)
+                    player->ApplyRatingMod(CombatRating(rating), 0, true);
+        }
+    }
 }
 
 float Stats::getAuraMultiplierForStatType(AuraType auraType, StatType statType) const
