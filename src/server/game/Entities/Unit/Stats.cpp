@@ -27,7 +27,7 @@ Stats::Stats(Unit* owner) : _owner(owner), _baseStats({ }), _baseStatModifiers({
     _totalModifiers({ }), _totalPctMultipliers({ })
 {
     _basePctMultipliers.fill(1.0);
-    _totalModifiers.fill(1.0);
+    _totalPctMultipliers.fill(1.0);
 }
 
 /// Returns the unmodified base value of the specified stat.
@@ -255,7 +255,7 @@ void Stats::updateStat(StatType statType)
     if (totalValue < statValue)
         posStatValue += statValue - totalValue;
     else
-        negStatValue += statValue - totalValue;
+        negStatValue += totalValue - statValue;
 
     // ==== Apply the stats
     _owner->SetInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(statType), statValue);
