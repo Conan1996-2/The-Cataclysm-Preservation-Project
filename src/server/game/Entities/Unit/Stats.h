@@ -27,7 +27,7 @@ enum AuraType : uint32;
 
 enum class StatType : int8
 {
-    PrimaryStat = -2,
+    AllStats2   = -2, // There is only one spell using this and it also states that it increases all stats
     AllStats    = -1,
     Strength    = 0,
     Agility     = 1,

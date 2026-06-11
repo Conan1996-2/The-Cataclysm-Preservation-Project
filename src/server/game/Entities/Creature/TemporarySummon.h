@@ -131,7 +131,7 @@ class TC_GAME_API Guardian : public Minion
         void SetBonusDamage(int32 damage);
     protected:
         int32   m_bonusSpellDamage;
-        float   m_statFromOwner[AsUnderlyingType(StatType::Max)];
+        float   m_statFromOwner[5];
 };
 
 class TC_GAME_API Puppet : public Minion

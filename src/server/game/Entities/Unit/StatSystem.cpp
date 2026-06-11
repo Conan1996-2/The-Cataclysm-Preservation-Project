@@ -26,6 +26,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "Stats.h"
 #include "World.h"
 #include <G3D/g3dmath.h>
 #include <numeric>

@@ -21,20 +21,21 @@
  * Scriptnames of files in this file should be prefixed with "spell_item_".
  */
 
-#include "ScriptMgr.h"
 #include "Battleground.h"
-#include "CreatureAIImpl.h"
 #include "Containers.h"
+#include "CreatureAIImpl.h"
 #include "DBCStores.h"
 #include "Map.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SkillDiscovery.h"
 #include "SpellAuraEffects.h"
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Stats.h"
 
 namespace Spells::Items
 {

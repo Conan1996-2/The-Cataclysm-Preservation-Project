@@ -102,6 +102,7 @@
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellPackets.h"
+#include "Stats.h"
 #include "StringConvert.h"
 #include "TerrainMgr.h"
 #include "TicketMgr.h"

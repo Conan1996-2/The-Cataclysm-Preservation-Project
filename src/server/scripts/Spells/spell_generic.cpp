@@ -22,10 +22,10 @@
  * Scriptnames of files in this file should be prefixed with "spell_gen_"
  */
 
-#include "ScriptMgr.h"
 #include "Battleground.h"
 #include "CellImpl.h"
 #include "Containers.h"
+#include "CreatureAIImpl.h"
 #include "DBCStores.h"
 #include "GameTime.h"
 #include "GridNotifiersImpl.h"
@@ -36,13 +36,14 @@
 #include "ObjectAccessor.h"
 #include "Pet.h"
 #include "ReputationMgr.h"
+#include "ScriptMgr.h"
 #include "SkillDiscovery.h"
 #include "SpellAuraEffects.h"
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Stats.h"
 #include "Vehicle.h"
-#include "CreatureAIImpl.h"
 
 namespace Spells::Generic
 {

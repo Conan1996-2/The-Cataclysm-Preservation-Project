@@ -21,13 +21,14 @@
  * Scriptnames of files in this file should be prefixed with "spell_dk_".
  */
 
-#include "ScriptMgr.h"
 #include "ObjectMgr.h"
 #include "Pet.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Stats.h"
 #include "Unit.h"
 
 namespace Spells::Pets

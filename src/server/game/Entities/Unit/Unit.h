@@ -22,7 +22,6 @@
 #include "Object.h"
 #include "SpellAuraDefines.h"
 #include "SpellDefines.h"
-#include "Stats.h"
 #include "ThreatManager.h"
 #include "Timer.h"
 #include "UnitDefines.h"
@@ -104,6 +103,8 @@ enum ProcFlagsSpellPhase : uint32;
 enum ProcFlagsSpellType : uint32;
 enum ZLiquidStatus : uint32;
 enum CharmType : uint8;
+
+enum class StatType : int8;
 
 namespace Movement
 {

@@ -21,14 +21,15 @@
  * Scriptnames of files in this file should be prefixed with "spell_sha_".
  */
 
-#include "ScriptMgr.h"
-#include "Player.h"
 #include "GridNotifiers.h"
 #include "Item.h"
+#include "Player.h"
+#include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Stats.h"
 #include "TemporarySummon.h"
 #include "Unit.h"
 

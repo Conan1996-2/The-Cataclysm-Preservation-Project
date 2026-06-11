@@ -75,7 +75,7 @@ void Stats::RemoveBaseStatModifier(StatType statType, int32 value)
 /// @param statType The stat which multiplier value will be updated
 void Stats::UpdateBaseStatMultiplier(StatType statType)
 {
-    if (statType == StatType::AllStats)
+    if (statType == StatType::AllStats || statType == StatType::AllStats2)
     {
         for (StatType stat : AllStats)
         {
@@ -83,13 +83,6 @@ void Stats::UpdateBaseStatMultiplier(StatType statType)
             _basePctMultipliers[AsUnderlyingType(stat)] = multiplier;
             updateStat(stat);
         }
-    }
-    else if (statType == StatType::PrimaryStat)
-    {
-        StatType primaryStat = GetPrimaryStat();
-        float multiplier = getAuraMultiplierForStatType(SPELL_AURA_MOD_PERCENT_STAT, primaryStat);
-        _basePctMultipliers[AsUnderlyingType(primaryStat)] = multiplier;
-        updateStat(primaryStat);
     }
     else
     {
@@ -104,7 +97,7 @@ void Stats::UpdateBaseStatMultiplier(StatType statType)
 /// @param statType The stat which modifier value will be updated
 void Stats::UpdateTotalStatModifier(StatType statType)
 {
-    if (statType == StatType::AllStats)
+    if (statType == StatType::AllStats || statType == StatType::AllStats2)
     {
         for (StatType stat : AllStats)
         {
@@ -112,13 +105,6 @@ void Stats::UpdateTotalStatModifier(StatType statType)
             _totalModifiers[AsUnderlyingType(stat)] = modifier;
             updateStat(stat);
         }
-    }
-    else if (statType == StatType::PrimaryStat)
-    {
-        StatType primaryStat = GetPrimaryStat();
-        int32 modifier = getAuraModifierForStatType(SPELL_AURA_MOD_STAT, primaryStat);
-        _totalModifiers[AsUnderlyingType(primaryStat)] = modifier;
-        updateStat(primaryStat);
     }
     else
     {
@@ -133,7 +119,7 @@ void Stats::UpdateTotalStatModifier(StatType statType)
 /// @param statType The stat which multiplier value will be updated
 void Stats::UpdateTotalStatMultiplier(StatType statType)
 {
-    if (statType == StatType::AllStats)
+    if (statType == StatType::AllStats || statType == StatType::AllStats2)
     {
         for (StatType stat : AllStats)
         {
@@ -141,13 +127,6 @@ void Stats::UpdateTotalStatMultiplier(StatType statType)
             _totalPctMultipliers[AsUnderlyingType(stat)] = multiplier;
             updateStat(stat);
         }
-    }
-    else if (statType == StatType::PrimaryStat)
-    {
-        StatType primaryStat = GetPrimaryStat();
-        float multiplier = getAuraMultiplierForStatType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, primaryStat);
-        _totalPctMultipliers[AsUnderlyingType(primaryStat)] = multiplier;
-        updateStat(primaryStat);
     }
     else
     {
@@ -238,7 +217,7 @@ void Stats::updateStat(StatType statType)
     if (flatStatValue < baseTotalValue)
         posStatValue += baseTotalValue - flatStatValue;
     else
-        negStatValue += flatStatValue - baseTotalValue;
+        negStatValue += baseTotalValue - flatStatValue;
 
     // ==== Calculate the total value (Total value buff auras)
     int32 totalModifier = _totalModifiers[AsUnderlyingType(statType)];
@@ -255,7 +234,7 @@ void Stats::updateStat(StatType statType)
     if (totalValue < statValue)
         posStatValue += statValue - totalValue;
     else
-        negStatValue += totalValue - statValue;
+        negStatValue +=  statValue - totalValue;
 
     // ==== Apply the stats
     _owner->SetInt32Value(UNIT_FIELD_STAT0 + AsUnderlyingType(statType), statValue);
@@ -302,10 +281,7 @@ float Stats::getAuraMultiplierForStatType(AuraType auraType, StatType statType) 
     float multiplier = _owner->GetTotalAuraMultiplier(auraType, [&](AuraEffect const* aurEff)
     {
         StatType auraStatType = static_cast<StatType>(aurEff->GetMiscValue());
-        if (auraStatType == StatType::AllStats || auraStatType == statType)
-            return true;
-
-        if (auraStatType == StatType::PrimaryStat && statType == GetPrimaryStat())
+        if (auraStatType == StatType::AllStats || auraStatType == StatType::AllStats2 || auraStatType == statType)
             return true;
 
         return false;
@@ -319,10 +295,7 @@ int32 Stats::getAuraModifierForStatType(AuraType auraType, StatType statType) co
     int32 modifier = _owner->GetTotalAuraModifier(auraType, [&](AuraEffect const* aurEff)
     {
         StatType auraStatType = static_cast<StatType>(aurEff->GetMiscValue());
-        if (auraStatType == StatType::AllStats || auraStatType == statType)
-            return true;
-
-        if (auraStatType == StatType::PrimaryStat && statType == GetPrimaryStat())
+        if (auraStatType == StatType::AllStats || auraStatType == StatType::AllStats2 || auraStatType == statType)
             return true;
 
         return false;
