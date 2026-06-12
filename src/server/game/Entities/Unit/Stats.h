@@ -27,23 +27,33 @@ enum AuraType : uint32;
 
 enum class StatType : int8
 {
-    AllStats2   = -2, // There is only one spell using this and it also states that it increases all stats
-    AllStats    = -1,
-    Strength    = 0,
-    Agility     = 1,
-    Stamina     = 2,
-    Intellect   = 3,
-    Spirit      = 4,
-    Max
+    // Primary Stats
+    AllPrimaryStats2   = -2, // There is only one spell using this and it also states that it increases all stats
+    AllPrimaryStats    = -1,
+    Strength            = 0,
+    Agility             = 1,
+    Stamina             = 2,
+    Intellect           = 3,
+    Spirit              = 4,
+    Max,
 };
 
-static constexpr std::array<StatType, AsUnderlyingType(StatType::Max)> AllStats =
+static constexpr std::array<StatType, AsUnderlyingType(StatType::Max)> AllPrimaryStats =
 {
     StatType::Strength,
     StatType::Agility,
     StatType::Stamina,
     StatType::Intellect,
     StatType::Spirit
+};
+
+struct StatData
+{
+    int32 BaseStat = 0;
+    int32 BaseStatModifier = 0;
+    int32 TotalModifier = 0;
+    double BasePctMultiplier = 1.0;
+    double TotalPctMultiplier = 1.0;
 };
 
 class TC_GAME_API Stats
@@ -70,13 +80,10 @@ public:
 
 private:
     Unit* _owner;
-    std::array<int32, AsUnderlyingType(StatType::Max)> _baseStats;
-    std::array<int32, AsUnderlyingType(StatType::Max)> _baseStatModifiers;
-    std::array<double, AsUnderlyingType(StatType::Max)> _basePctMultipliers;
-    std::array<int32, AsUnderlyingType(StatType::Max)> _totalModifiers;
-    std::array<double, AsUnderlyingType(StatType::Max)> _totalPctMultipliers;
+    std::array<StatData, AsUnderlyingType(StatType::Max)> _primaryStatData;
 
     void updateStat(StatType statType);
+    void calculateStatValues(StatData const& statData, int32& statValue, int32& posStatValue, int32& negStatValue);
     float getAuraMultiplierForStatType(AuraType auraType, StatType statType) const;
     int32 getAuraModifierForStatType(AuraType auraType, StatType statType) const;
 

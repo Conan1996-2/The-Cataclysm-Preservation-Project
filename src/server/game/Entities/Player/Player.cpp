@@ -2230,7 +2230,7 @@ void Player::GiveLevel(uint8 level)
     packet.PowerDelta[4] = 0;
     packet.PowerDelta[5] = 0;
 
-    for (StatType stat : AllStats)
+    for (StatType stat : AllPrimaryStats)
         packet.StatDelta[AsUnderlyingType(stat)] = int32(info.stats[AsUnderlyingType(stat)]) - GetStats().GetBaseStatValue(stat);
 
     SendDirectMessage(packet.Write());
@@ -2250,7 +2250,7 @@ void Player::GiveLevel(uint8 level)
     SetCreateMana(basemana);
 
     // save base values (bonuses already included in stored stats)
-    for (StatType stat : AllStats)
+    for (StatType stat : AllPrimaryStats)
         GetStats().SetBaseStatValue(stat, info.stats[AsUnderlyingType(stat)]);
 
     InitTalentForLevel();
@@ -2380,7 +2380,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetCreateMana(basemana);
 
     // save base values (bonuses already included in stored stats
-    for (StatType stat : AllStats)
+    for (StatType stat : AllPrimaryStats)
         GetStats().SetBaseStatValue(stat, info.stats[AsUnderlyingType(stat)]);
 
     //reset rating fields values
@@ -20030,7 +20030,7 @@ void Player::_SaveStats(CharacterDatabaseTransaction& trans) const
     for (uint8 i = 0; i < MAX_POWERS_PER_CLASS; ++i)
         stmt->setUInt32(index++, GetMaxPower(PowerType(i)));
 
-    for (StatType stat : AllStats)
+    for (StatType stat : AllPrimaryStats)
         stmt->setUInt32(index++, GetStat(stat));
 
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)

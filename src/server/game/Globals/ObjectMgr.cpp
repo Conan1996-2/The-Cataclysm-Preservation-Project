@@ -3284,7 +3284,7 @@ void ObjectMgr::LoadPetLevelInfo()
         pLevelInfo->armor  = fields[9].GetUInt32();
 
 
-        for (StatType stat : AllStats)
+        for (StatType stat : AllPrimaryStats)
             pLevelInfo->stats[AsUnderlyingType(stat)] = fields[AsUnderlyingType(stat) + 4].GetUInt16();
 
         ++count;
@@ -3732,7 +3732,7 @@ void ObjectMgr::LoadPlayerInfo()
                 continue;
             }
 
-            for (StatType stat : AllStats)
+            for (StatType stat : AllPrimaryStats)
                 raceStatModifiers[current_race].StatModifier[AsUnderlyingType(stat)] = fields[AsUnderlyingType(stat) + 1].GetInt16();
 
         } while (raceStatsResult->NextRow());
@@ -3781,7 +3781,7 @@ void ObjectMgr::LoadPlayerInfo()
                         playerInfo->levelInfo = std::make_unique<PlayerLevelInfo[]>(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
 
                     PlayerLevelInfo& levelInfo = playerInfo->levelInfo[current_level - 1];
-                    for (StatType stat : AllStats)
+                    for (StatType stat : AllPrimaryStats)
                         levelInfo.stats[AsUnderlyingType(stat)] = fields[AsUnderlyingType(stat) + 2].GetUInt16() + raceStatModifiers[race].StatModifier[AsUnderlyingType(stat)];
                 }
             }

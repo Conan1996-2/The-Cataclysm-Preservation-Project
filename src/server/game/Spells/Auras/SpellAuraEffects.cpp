@@ -3570,7 +3570,7 @@ void AuraEffect::HandleAuraModStat(AuraApplication const* aurApp, uint8 mode, bo
         return;
 
     StatType stat = static_cast<StatType>(GetMiscValue());
-    if (stat < StatType::AllStats2 || stat >= StatType::Max)
+    if (stat < StatType::AllPrimaryStats2 || stat >= StatType::Max)
     {
         TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_STAT ", GetId(), GetEffIndex(), GetMiscValue());
         return;
@@ -3586,7 +3586,7 @@ void AuraEffect::HandleModPercentStat(AuraApplication const* aurApp, uint8 mode,
         return;
 
     StatType stat = static_cast<StatType>(GetMiscValue());
-    if (stat < StatType::AllStats2 || stat >= StatType::Max)
+    if (stat < StatType::AllPrimaryStats2 || stat >= StatType::Max)
     {
         TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_PERCENT_STAT ", GetId(), GetEffIndex(), GetMiscValue());
         return;
@@ -3676,7 +3676,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
         return;
 
     StatType stat = static_cast<StatType>(GetMiscValue());
-    if (stat < StatType::AllStats2 || stat >= StatType::Max)
+    if (stat < StatType::AllPrimaryStats2 || stat >= StatType::Max)
     {
         TC_LOG_ERROR("spells", "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE ", GetId(), GetEffIndex(), GetMiscValue());
         return;
